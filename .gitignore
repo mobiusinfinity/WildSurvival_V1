@@ -1,3 +1,33 @@
+# Normalize line endings to LF in repo; Windows will check out CRLF by default unless core.autocrlf=false
+* text=auto
+
+# Treat these as text (Unity-friendly)
+*.cs text
+*.meta text
+*.shader text
+*.cginc text
+*.compute text
+*.hlsl text
+*.json text
+*.asmdef text
+*.asset text
+*.prefab text
+*.uxml text
+*.uss text
+*.shadergraph text
+
+# Binary
+*.png binary
+*.jpg binary
+*.tga binary
+*.psd binary
+*.fbx binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.zip binary
+
+
 # Unity (slim)
 [Ll]ibrary/
 [Tt]emp/
