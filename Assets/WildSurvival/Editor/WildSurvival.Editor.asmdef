@@ -1,7 +1,0 @@
-{
-  "name": "WildSurvival.Editor",
-  "includePlatforms": [ "Editor" ],
-  "references": [],
-  "autoReferenced": true,
-  "noEngineReferences": false
-}
