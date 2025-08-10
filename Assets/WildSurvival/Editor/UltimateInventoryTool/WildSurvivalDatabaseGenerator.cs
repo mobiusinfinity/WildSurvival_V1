@@ -1400,6 +1400,8 @@ namespace WildSurvival.Editor.DatabaseGeneration
             return recipe;
         }
 
+
+
         private RecipeDefinition CreateRecipe(string id, string name, CraftingCategory category,
             WorkstationType workstation, (string, int)[] ingredients, (string, int)[] outputs, float craftTime = 5f)
         {
@@ -1436,14 +1438,274 @@ namespace WildSurvival.Editor.DatabaseGeneration
                 if (!AssetDatabase.IsValidFolder(currentPath))
                 {
                     AssetDatabase.CreateFolder(parentPath, folders[i]);
+                    Debug.Log($"Created folder: {currentPath}");
+                }
+            }
+
+            // Refresh to ensure Unity recognizes the new folders
+            AssetDatabase.Refresh();
+        }
+        public static class ProjectInitializer
+        {
+            [MenuItem("Tools/Wild Survival/Initialize Project", priority = 0)]
+            public static void InitializeProject()
+            {
+                Debug.Log("=== Initializing Wild Survival Project ===");
+
+                // 1. Create folder structure
+                CreateFolderStructure();
+
+                // 2. Create databases
+                CreateDatabases();
+
+                // 3. Refresh
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+
+                Debug.Log("=== Project initialization complete! ===");
+                EditorUtility.DisplayDialog("Success", "Project structure initialized successfully!", "OK");
+            }
+
+            private static void CreateFolderStructure()
+            {
+                // Main folders
+                CreateFolder("Assets", "_Project");
+                CreateFolder("Assets/_Project", "Scripts");
+                CreateFolder("Assets/_Project", "Data");
+                CreateFolder("Assets/_Project", "Prefabs");
+                CreateFolder("Assets/_Project", "Materials");
+                CreateFolder("Assets/_Project", "Textures");
+
+                // Script subfolders
+                CreateFolder("Assets/_Project/Scripts", "Data");
+                CreateFolder("Assets/_Project/Scripts", "Database");
+                CreateFolder("Assets/_Project/Scripts", "Inventory");
+                CreateFolder("Assets/_Project/Scripts", "Crafting");
+                CreateFolder("Assets/_Project/Scripts", "Player");
+                CreateFolder("Assets/_Project/Scripts", "Editor");
+
+                // Data subfolders
+                CreateFolder("Assets/_Project/Data", "Items");
+                CreateFolder("Assets/_Project/Data", "Recipes");
+                CreateFolder("Assets/_Project/Data", "Config");
+
+                Debug.Log("Folder structure created");
+            }
+
+            private static void CreateFolder(string parent, string newFolder)
+            {
+                string path = $"{parent}/{newFolder}";
+                if (!AssetDatabase.IsValidFolder(path))
+                {
+                    AssetDatabase.CreateFolder(parent, newFolder);
+                }
+            }
+
+            private static void CreateDatabases()
+            {
+                // Item Database
+                string itemDbPath = "Assets/_Project/Data/ItemDatabase.asset";
+                if (!AssetDatabase.LoadAssetAtPath<ItemDatabase>(itemDbPath))
+                {
+                    var itemDb = ScriptableObject.CreateInstance<ItemDatabase>();
+                    AssetDatabase.CreateAsset(itemDb, itemDbPath);
+                    Debug.Log("Created ItemDatabase");
+                }
+
+                // Recipe Database
+                string recipeDbPath = "Assets/_Project/Data/RecipeDatabase.asset";
+                if (!AssetDatabase.LoadAssetAtPath<RecipeDatabase>(recipeDbPath))
+                {
+                    var recipeDb = ScriptableObject.CreateInstance<RecipeDatabase>();
+                    AssetDatabase.CreateAsset(recipeDb, recipeDbPath);
+                    Debug.Log("Created RecipeDatabase");
+                }
+            }
+
+            [MenuItem("Tools/Wild Survival/Validate Project Setup")]
+            public static void ValidateSetup()
+            {
+                bool isValid = true;
+                var report = new System.Text.StringBuilder();
+                report.AppendLine("=== Project Validation Report ===");
+
+                // Check folders
+                string[] requiredFolders = {
+            "Assets/_Project",
+            "Assets/_Project/Data",
+            "Assets/_Project/Data/Items",
+            "Assets/_Project/Data/Recipes",
+            "Assets/_Project/Scripts"
+        };
+
+                foreach (var folder in requiredFolders)
+                {
+                    if (AssetDatabase.IsValidFolder(folder))
+                    {
+                        report.AppendLine($"✓ {folder}");
+                    }
+                    else
+                    {
+                        report.AppendLine($"✗ {folder} - MISSING");
+                        isValid = false;
+                    }
+                }
+
+                // Check databases
+                if (AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/_Project/Data/ItemDatabase.asset"))
+                {
+                    report.AppendLine("✓ ItemDatabase exists");
+                }
+                else
+                {
+                    report.AppendLine("✗ ItemDatabase - MISSING");
+                    isValid = false;
+                }
+
+                if (AssetDatabase.LoadAssetAtPath<RecipeDatabase>("Assets/_Project/Data/RecipeDatabase.asset"))
+                {
+                    report.AppendLine("✓ RecipeDatabase exists");
+                }
+                else
+                {
+                    report.AppendLine("✗ RecipeDatabase - MISSING");
+                    isValid = false;
+                }
+
+                report.AppendLine($"\nValidation Result: {(isValid ? "PASSED" : "FAILED")}");
+
+                Debug.Log(report.ToString());
+
+                if (!isValid)
+                {
+                    if (EditorUtility.DisplayDialog("Validation Failed",
+                        "Project setup is incomplete. Would you like to initialize now?",
+                        "Yes", "No"))
+                    {
+                        InitializeProject();
+                    }
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Validation Passed",
+                        "Project setup is complete and valid!", "Great!");
                 }
             }
         }
+
 
         private void LogGeneration(string message)
         {
             generationLog.Add(message);
             Debug.Log($"[Database Generator] {message}");
+        }
+
+        public static class DatabaseGeneratorExtensions
+        {
+            [MenuItem("Tools/Wild Survival/Add Missing Items")]
+            public static void AddMissingItems()
+            {
+                // Ensure all directories exist first
+                EnsureDirectoryStructure();
+
+                var itemDB = AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/_Project/Data/ItemDatabase.asset");
+                if (itemDB == null)
+                {
+                    Debug.LogError("ItemDatabase not found at Assets/_Project/Data/ItemDatabase.asset");
+                    return;
+                }
+
+                // Create misc_salt if it doesn't exist
+                if (itemDB.GetItem("misc_salt") == null)
+                {
+                    var salt = ScriptableObject.CreateInstance<ItemDefinition>();
+                    salt.itemID = "misc_salt";
+                    salt.displayName = "Salt";
+                    salt.description = "Mineral salt for preservation";
+                    salt.primaryCategory = ItemCategory.Misc;
+                    salt.weight = 0.1f;
+                    salt.maxStackSize = 50;
+                    salt.gridSize = Vector2Int.one;
+
+                    AssetDatabase.CreateAsset(salt, "Assets/_Project/Data/Items/misc_salt.asset");
+                    itemDB.AddItem(salt);
+                    Debug.Log("Created missing item: Salt");
+                }
+
+                // Create ingot_tin if missing
+                if (itemDB.GetItem("ingot_tin") == null)
+                {
+                    var tin = ScriptableObject.CreateInstance<ItemDefinition>();
+                    tin.itemID = "ingot_tin";
+                    tin.displayName = "Tin Ingot";
+                    tin.description = "Refined tin ingot";
+                    tin.primaryCategory = ItemCategory.Resource;
+                    tin.weight = 1f;
+                    tin.maxStackSize = 20;
+                    tin.gridSize = Vector2Int.one;
+
+                    AssetDatabase.CreateAsset(tin, "Assets/_Project/Data/Items/ingot_tin.asset");
+                    itemDB.AddItem(tin);
+                    Debug.Log("Created missing item: Tin Ingot");
+                }
+
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+
+                Debug.Log("Missing items check complete!");
+            }
+
+            private static void EnsureDirectoryStructure()
+            {
+                // Create main project folder
+                if (!AssetDatabase.IsValidFolder("Assets/_Project"))
+                {
+                    AssetDatabase.CreateFolder("Assets", "_Project");
+                }
+
+                // Create Data folder
+                if (!AssetDatabase.IsValidFolder("Assets/_Project/Data"))
+                {
+                    AssetDatabase.CreateFolder("Assets/_Project", "Data");
+                }
+
+                // Create Items folder
+                if (!AssetDatabase.IsValidFolder("Assets/_Project/Data/Items"))
+                {
+                    AssetDatabase.CreateFolder("Assets/_Project/Data", "Items");
+                }
+
+                // Create Recipes folder
+                if (!AssetDatabase.IsValidFolder("Assets/_Project/Data/Recipes"))
+                {
+                    AssetDatabase.CreateFolder("Assets/_Project/Data", "Recipes");
+                }
+
+                // Create database files if they don't exist
+                CreateDatabasesIfMissing();
+            }
+
+            private static void CreateDatabasesIfMissing()
+            {
+                // Create ItemDatabase if missing
+                string itemDbPath = "Assets/_Project/Data/ItemDatabase.asset";
+                if (!AssetDatabase.LoadAssetAtPath<ItemDatabase>(itemDbPath))
+                {
+                    var itemDb = ScriptableObject.CreateInstance<ItemDatabase>();
+                    AssetDatabase.CreateAsset(itemDb, itemDbPath);
+                    Debug.Log("Created ItemDatabase");
+                }
+
+                // Create RecipeDatabase if missing
+                string recipeDbPath = "Assets/_Project/Data/RecipeDatabase.asset";
+                if (!AssetDatabase.LoadAssetAtPath<RecipeDatabase>(recipeDbPath))
+                {
+                    var recipeDb = ScriptableObject.CreateInstance<RecipeDatabase>();
+                    AssetDatabase.CreateAsset(recipeDb, recipeDbPath);
+                    Debug.Log("Created RecipeDatabase");
+                }
+            }
+
         }
     }
 
@@ -1486,12 +1748,24 @@ namespace WildSurvival.Editor.DatabaseGeneration
 
                 AssetDatabase.CreateAsset(tin, "Assets/_Project/Data/Items/ingot_tin.asset");
                 itemDB.AddItem(tin);
+
+
             }
+
+            
+
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             Debug.Log("Missing items added successfully!");
+
+
         }
+
+
     }
+
+
 }
+

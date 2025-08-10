@@ -325,6 +325,10 @@ namespace WildSurvival.Editor.Tools
         private const float MIN_WINDOW_WIDTH = 1200f;
         private const float MIN_WINDOW_HEIGHT = 800f;
 
+        private GUIStyle headerStyle;
+        private GUIStyle boxStyle;
+        private bool stylesInitialized = false;
+
         // Tab System
         private string[] tabNames = new[]
         {
@@ -357,8 +361,8 @@ namespace WildSurvival.Editor.Tools
         private bool isDirty = false;
 
         // Styling
-        private GUIStyle headerStyle;
-        private GUIStyle boxStyle;
+        //private GUIStyle headerStyle;
+        //private GUIStyle boxStyle;
 
         [MenuItem("Tools/Wild Survival/Ultimate Inventory Tool")]
         public static void ShowWindow()
@@ -372,8 +376,8 @@ namespace WildSurvival.Editor.Tools
         {
             LoadDatabases();
             InitializeTabs();
-            SetupStyles();
             RefreshCaches();
+            // Remove SetupStyles() from here - it won't work properly
         }
 
         private void LoadDatabases()
@@ -430,24 +434,40 @@ namespace WildSurvival.Editor.Tools
             databaseManager = new DatabaseManagerTab(this);
         }
 
-        private void SetupStyles()
+        private void InitializeStyles()
         {
-            headerStyle = new GUIStyle(EditorStyles.boldLabel)
-            {
-                fontSize = 14,
-                alignment = TextAnchor.MiddleLeft,
-                padding = new RectOffset(10, 10, 5, 5)
-            };
+            if (stylesInitialized) return;
 
-            boxStyle = new GUIStyle(GUI.skin.box)
+            try
             {
-                padding = new RectOffset(10, 10, 10, 10),
-                margin = new RectOffset(5, 5, 5, 5)
-            };
+                headerStyle = new GUIStyle(EditorStyles.boldLabel)
+                {
+                    fontSize = 14,
+                    alignment = TextAnchor.MiddleLeft,
+                    padding = new RectOffset(10, 10, 5, 5)
+                };
+
+                boxStyle = new GUIStyle(GUI.skin.box)
+                {
+                    padding = new RectOffset(10, 10, 10, 10),
+                    margin = new RectOffset(5, 5, 5, 5)
+                };
+
+                stylesInitialized = true;
+            }
+            catch
+            {
+                // Fallback to defaults if initialization fails
+                headerStyle = EditorStyles.boldLabel;
+                boxStyle = GUI.skin.box;
+            }
         }
 
         private void OnGUI()
         {
+            // Initialize styles at the start of OnGUI
+            InitializeStyles();
+
             DrawHeader();
             DrawToolbar();
             DrawTabContent();
@@ -647,6 +667,12 @@ namespace WildSurvival.Editor.Tools
 
             public void Draw()
             {
+
+                var safeHeaderStyle = tool.headerStyle ?? EditorStyles.boldLabel;
+                var safeBoxStyle = tool.boxStyle ?? GUI.skin.box;
+
+                EditorGUILayout.LabelField("Dashboard", safeHeaderStyle);
+
                 EditorGUILayout.LabelField("Dashboard", tool.headerStyle);
                 EditorGUILayout.Space(10);
 
@@ -808,6 +834,9 @@ namespace WildSurvival.Editor.Tools
 
             public void Draw()
             {
+                var safeHeaderStyle = tool.headerStyle ?? EditorStyles.boldLabel;
+                var safeBoxStyle = tool.boxStyle ?? GUI.skin.box;
+                
                 EditorGUILayout.BeginHorizontal();
 
                 // Left Panel - Item List
@@ -1307,9 +1336,13 @@ namespace WildSurvival.Editor.Tools
 
             public void Draw()
             {
-                EditorGUILayout.LabelField("Database Manager", tool.headerStyle);
+                // Use safe style access
+                var safeHeaderStyle = tool.headerStyle ?? EditorStyles.boldLabel;
+                var safeBoxStyle = tool.boxStyle ?? GUI.skin.box;
 
-                EditorGUILayout.BeginVertical(tool.boxStyle);
+                EditorGUILayout.LabelField("Database Manager", safeHeaderStyle);
+
+                EditorGUILayout.BeginVertical(safeBoxStyle);
 
                 EditorGUILayout.LabelField("Database Info", EditorStyles.boldLabel);
                 EditorGUILayout.LabelField($"Items: {tool.cachedItems?.Count ?? 0}");
@@ -1327,10 +1360,121 @@ namespace WildSurvival.Editor.Tools
                     tool.SaveChangesInternal();
                 }
 
+                EditorGUILayout.Space(10);
+
+                // Add more database operations
+                EditorGUILayout.LabelField("Database Operations", EditorStyles.boldLabel);
+
+                if (GUILayout.Button("Validate All Items", GUILayout.Height(25)))
+                {
+                    ValidateItems();
+                }
+
+                if (GUILayout.Button("Validate All Recipes", GUILayout.Height(25)))
+                {
+                    ValidateRecipes();
+                }
+
+                if (GUILayout.Button("Export Database to JSON", GUILayout.Height(25)))
+                {
+                    ExportToJSON();
+                }
+
                 EditorGUILayout.EndVertical();
             }
 
-            public void Refresh() { }
+            private void ValidateItems()
+            {
+                int issues = 0;
+                foreach (var item in tool.cachedItems ?? new List<ItemDefinition>())
+                {
+                    if (string.IsNullOrEmpty(item.itemID))
+                    {
+                        Debug.LogWarning($"Item '{item.name}' has no ID");
+                        issues++;
+                    }
+                    if (item.weight <= 0)
+                    {
+                        Debug.LogWarning($"Item '{item.displayName}' has invalid weight: {item.weight}");
+                        issues++;
+                    }
+                    if (item.gridSize.x <= 0 || item.gridSize.y <= 0)
+                    {
+                        Debug.LogWarning($"Item '{item.displayName}' has invalid grid size: {item.gridSize}");
+                        issues++;
+                    }
+                }
+
+                if (issues == 0)
+                {
+                    Debug.Log("✓ All items validated successfully!");
+                    EditorUtility.DisplayDialog("Validation Complete", "All items are valid!", "Great!");
+                }
+                else
+                {
+                    Debug.LogError($"✗ Found {issues} validation issues");
+                    EditorUtility.DisplayDialog("Validation Failed", $"Found {issues} issues. Check console for details.", "OK");
+                }
+            }
+
+            private void ValidateRecipes()
+            {
+                int issues = 0;
+                foreach (var recipe in tool.cachedRecipes ?? new List<RecipeDefinition>())
+                {
+                    if (string.IsNullOrEmpty(recipe.recipeID))
+                    {
+                        Debug.LogWarning($"Recipe '{recipe.name}' has no ID");
+                        issues++;
+                    }
+                    if (recipe.ingredients == null || recipe.ingredients.Length == 0)
+                    {
+                        Debug.LogWarning($"Recipe '{recipe.recipeName}' has no ingredients");
+                        issues++;
+                    }
+                    if (recipe.outputs == null || recipe.outputs.Length == 0)
+                    {
+                        Debug.LogWarning($"Recipe '{recipe.recipeName}' has no outputs");
+                        issues++;
+                    }
+                }
+
+                if (issues == 0)
+                {
+                    Debug.Log("✓ All recipes validated successfully!");
+                    EditorUtility.DisplayDialog("Validation Complete", "All recipes are valid!", "Great!");
+                }
+                else
+                {
+                    Debug.LogError($"✗ Found {issues} validation issues");
+                    EditorUtility.DisplayDialog("Validation Failed", $"Found {issues} issues. Check console for details.", "OK");
+                }
+            }
+
+            private void ExportToJSON()
+            {
+                string path = EditorUtility.SaveFilePanel("Export Database", "", "inventory_database.json", "json");
+                if (!string.IsNullOrEmpty(path))
+                {
+                    var data = new
+                    {
+                        items = tool.cachedItems,
+                        recipes = tool.cachedRecipes,
+                        exportDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                    };
+
+                    string json = JsonUtility.ToJson(data, true);
+                    System.IO.File.WriteAllText(path, json);
+
+                    Debug.Log($"Database exported to: {path}");
+                    EditorUtility.DisplayDialog("Export Complete", "Database exported successfully!", "OK");
+                }
+            }
+
+            public void Refresh()
+            {
+                // Refresh database manager if needed
+            }
         }
     }
 }

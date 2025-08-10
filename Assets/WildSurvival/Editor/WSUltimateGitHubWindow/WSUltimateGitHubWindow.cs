@@ -645,6 +645,7 @@ namespace WildSurvival.EditorTools
         }
 
 
+
         void WriteGitattributes()
         {
             var path = Path.Combine(_repoRoot, ".gitattributes");
