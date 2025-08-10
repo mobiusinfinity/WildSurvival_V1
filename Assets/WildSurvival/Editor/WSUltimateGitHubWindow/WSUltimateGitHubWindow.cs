@@ -1,628 +1,738 @@
-﻿// Assets/WildSurvival/Editor/WSUltimateGitHubWindow.cs
-// Unity 6+ (Editor only). Single-file "Ultimate Git Hub" panel.
-// v1.2 - branches, stash, per-file staging, VSCode difftool, commit UX.
+﻿// Assets/WildSurvival/Editor/WSUltimateGitHubWindow/WSUltimateGitHubWindow.cs
+// Unity 6 Editor-only. Single-file "Git & Share Hub" window.
+// v1.3: stage helpers, commit message field, quick commit+push,
+//       branch create/checkout, VS Code diff/merge config,
+//       origin+mirror remotes, .gitattributes writer, richer log.
 
 #if UNITY_EDITOR
 using System;
-using System.IO;
-using System.Text;
-using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
+using System.IO;
+using System.Linq;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 namespace WildSurvival.EditorTools
 {
     public class WSUltimateGitHubWindow : EditorWindow
     {
-        const string Version = "1.2";
         const string MenuPath = "Wild Survival/Git & Share/Git & Share Hub";
+        const int DefaultTimeoutMs = 120000;
+
         [MenuItem(MenuPath, false, 20)]
-        public static void Open() => GetWindow<WSUltimateGitHubWindow>("WS • Git Hub").Show();
-
-        // Persisted UI
-        const string PREF_REPO = "WSGitHub.RepoRoot";
-        const string PREF_COMMIT = "WSGitHub.CommitMsg";
-        const string PREF_BRANCH = "WSGitHub.Branch";
-        const string PREF_REMOTE = "WSGitHub.Remote";
-
-        string _repoRoot;
-        string _commitMessage;
-        string _currentBranch;
-        string _remoteName = "origin";
-        string _remoteUrl;
-
-        // status cache
-        class FileEntry
+        public static void Open()
         {
-            public string code;   // e.g. "M ", "??", " D", "A "
-            public string path;   // relative path
+            var w = GetWindow<WSUltimateGitHubWindow>("Git & Share Hub");
+            w.Show();
         }
-        readonly List<FileEntry> _changed = new();
-        readonly List<FileEntry> _untracked = new();
-        readonly HashSet<string> _selected = new(StringComparer.OrdinalIgnoreCase);
 
-        // misc ui
-        string _newBranch = "";
-        string _stashMessage = "";
-        string _userName = "";
-        string _userEmail = "";
-        Vector2 _scroll;
-        StringBuilder _log = new StringBuilder(2048);
-        DateTime _lastRefresh;
+        // State
+        string _repoRoot = "";
+        string _branch = "";
+        string _originUrl = "";
+        string _mirrorUrl = "";
+        string _commitMsg = "";
+        bool _busy = false;
+        Vector2 _svStatus;
+        Vector2 _svLog;
+        readonly StringBuilder _log = new StringBuilder(4096);
 
+        // Parsed status entries (from `git status --porcelain -z`)
+        class StatusEntry
+        {
+            public string Code;   // e.g., "M ", "A ", " D", "??"
+            public string Path;   // path (or old path for renames)
+            public string Path2;  // new path if rename/copy
+        }
+        readonly List<StatusEntry> _status = new List<StatusEntry>();
+
+        // --------- Unity lifecycle ---------
         void OnEnable()
         {
-            _repoRoot = EditorPrefs.GetString(PREF_REPO, TryFindRepoRoot(Application.dataPath));
-            _commitMessage = EditorPrefs.GetString(PREF_COMMIT, "");
-            _remoteName = EditorPrefs.GetString(PREF_REMOTE, "origin");
-            _currentBranch = EditorPrefs.GetString(PREF_BRANCH, "main");
-            AppendLog($"[Init] v{Version}. Repo: {_repoRoot}");
-            SafeRefresh();
+            // Load persisted prefs
+            _originUrl = EditorPrefs.GetString("WSGitHub.originUrl", _originUrl);
+            _mirrorUrl = EditorPrefs.GetString("WSGitHub.mirrorUrl", _mirrorUrl);
+            _commitMsg = EditorPrefs.GetString("WSGitHub.commitMsg", _commitMsg);
+
+            DetectRepoRoot();
+            RefreshAll(silent: true);
+            AppendLog($"[Init] v1.3. Repo: {(_repoRoot == "" ? "(not detected)" : _repoRoot)}");
         }
 
         void OnDisable()
         {
-            EditorPrefs.SetString(PREF_REPO, _repoRoot ?? "");
-            EditorPrefs.SetString(PREF_COMMIT, _commitMessage ?? "");
-            EditorPrefs.SetString(PREF_REMOTE, _remoteName ?? "origin");
-            EditorPrefs.SetString(PREF_BRANCH, _currentBranch ?? "");
+            // Persist small fields
+            EditorPrefs.SetString("WSGitHub.originUrl", _originUrl);
+            EditorPrefs.SetString("WSGitHub.mirrorUrl", _mirrorUrl);
+            EditorPrefs.SetString("WSGitHub.commitMsg", _commitMsg);
         }
 
-        static string TryFindRepoRoot(string hintPath)
-        {
-            try
-            {
-                var d = new DirectoryInfo(hintPath);
-                while (d != null && d.Exists)
-                {
-                    var gitDir = Path.Combine(d.FullName, ".git");
-                    if (Directory.Exists(gitDir) || File.Exists(gitDir)) return d.FullName.Replace('\\', '/');
-                    d = d.Parent;
-                }
-            }
-            catch { }
-            return "";
-        }
-
+        // --------- UI ---------
         void OnGUI()
         {
-            using var scope = new EditorGUILayout.ScrollViewScope(_scroll);
-            _scroll = scope.scrollPosition;
-
-            GUILayout.Space(6);
-            Header();
-
-            GUILayout.Space(6);
-            RepoBox();
-
-            GUILayout.Space(4);
-            RowButtons();
-
-            GUILayout.Space(10);
-            StatusBox();
-
-            GUILayout.Space(10);
-            BranchingBox();
-
-            GUILayout.Space(10);
-            StashBox();
-
-            GUILayout.Space(10);
-            ToolsBox();
-
-            GUILayout.Space(10);
-            LogBox();
-        }
-
-        void Header()
-        {
-            using (new EditorGUILayout.HorizontalScope())
+            using (new EditorGUI.DisabledScope(_busy))
             {
-                GUILayout.Label("Ultimate Git Hub", EditorStyles.boldLabel);
-                GUILayout.FlexibleSpace();
-                GUILayout.Label($"v{Version}", EditorStyles.miniLabel);
-                if (GUILayout.Button("Refresh", GUILayout.Width(80))) SafeRefresh();
-            }
-            EditorGUILayout.HelpBox("One-stop Git panel for staging, committing, pulling, pushing, branching and more.\nTip: Ctrl/Cmd + Enter commits.", MessageType.Info);
-        }
+                DrawHeader();
 
-        void RepoBox()
-        {
-            EditorGUILayout.LabelField("Repository", EditorStyles.boldLabel);
-            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
-            {
-                using (new EditorGUILayout.HorizontalScope())
+                if (string.IsNullOrEmpty(_repoRoot))
                 {
-                    EditorGUILayout.LabelField("Repo Root", GUILayout.Width(80));
-                    var next = EditorGUILayout.TextField(_repoRoot);
-                    if (next != _repoRoot) { _repoRoot = next; EditorPrefs.SetString(PREF_REPO, _repoRoot); }
-                    if (GUILayout.Button("Browse", GUILayout.Width(80)))
-                    {
-                        var pick = EditorUtility.OpenFolderPanel("Select Repo Root (contains .git)", _repoRoot ?? "", "");
-                        if (!string.IsNullOrEmpty(pick)) { _repoRoot = pick.Replace('\\', '/'); SafeRefresh(); }
-                    }
-                    if (GUILayout.Button("Open Folder", GUILayout.Width(100)) && Directory.Exists(_repoRoot))
-                        EditorUtility.RevealInFinder(_repoRoot);
-                }
+                    EditorGUILayout.HelpBox(BuildTipsText(_repoRoot), MessageType.None);
 
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    EditorGUILayout.LabelField("Branch", GUILayout.Width(80));
-                    EditorGUILayout.SelectableLabel(_currentBranch ?? "(unknown)", GUILayout.Height(18));
-                    GUILayout.FlexibleSpace();
-                    EditorGUILayout.LabelField("Remote", GUILayout.Width(60));
-                    _remoteName = EditorGUILayout.TextField(_remoteName, GUILayout.Width(100));
-                    EditorGUILayout.SelectableLabel(_remoteUrl ?? "", GUILayout.Height(18));
-                }
-
-                GUILayout.Space(2);
-                EditorGUILayout.LabelField("Commit Message", EditorStyles.boldLabel);
-                var nextMsg = EditorGUILayout.TextArea(_commitMessage, GUILayout.MinHeight(48));
-                if (nextMsg != _commitMessage) { _commitMessage = nextMsg; EditorPrefs.SetString(PREF_COMMIT, _commitMessage); }
-
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    GUI.enabled = !string.IsNullOrWhiteSpace(_commitMessage);
-                    if (GUILayout.Button("Commit (Ctrl/Cmd+Enter)", GUILayout.Height(28)))
-                        Commit(_commitMessage);
-                    GUI.enabled = true;
-
-                    if (GUILayout.Button("Push", GUILayout.Width(100), GUILayout.Height(28)))
-                        Push();
-
-                    if (GUILayout.Button("Pull --rebase", GUILayout.Width(120), GUILayout.Height(28)))
-                        PullRebase();
-
-                    if (GUILayout.Button("Fetch", GUILayout.Width(80), GUILayout.Height(28)))
-                        GitSafe($"fetch {_remoteName}");
-                }
-
-                HandleCommitShortcut();
-            }
-        }
-
-        void HandleCommitShortcut()
-        {
-            var e = Event.current;
-            if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter))
-            {
-#if UNITY_EDITOR_OSX
-                if (e.command) { Commit(_commitMessage); e.Use(); }
-#else
-                if (e.control) { Commit(_commitMessage); e.Use(); }
-#endif
-            }
-        }
-
-        void RowButtons()
-        {
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                if (GUILayout.Button("Stage All", GUILayout.Height(24))) StageAll();
-                if (GUILayout.Button("Unstage All", GUILayout.Height(24))) UnstageAll();
-                if (GUILayout.Button("Discard Working Changes (careful)", GUILayout.Height(24)))
-                {
-                    if (EditorUtility.DisplayDialog("Discard ALL changes?",
-                        "This will revert modified files and remove untracked files.\nThis cannot be undone from here.",
-                        "Yes, discard", "Cancel"))
-                    {
-                        DiscardAll();
-                    }
-                }
-                if (GUILayout.Button("Open in External Git GUI", GUILayout.Height(24)))
-                    OpenExternalGitGUI();
-            }
-        }
-
-        void StatusBox()
-        {
-            EditorGUILayout.LabelField("Changes", EditorStyles.boldLabel);
-            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
-            {
-                if (string.IsNullOrEmpty(_repoRoot) || !HasGit())
-                {
-                    EditorGUILayout.HelpBox("Set Repo Root and ensure Git is installed.", MessageType.Warning);
+                    if (GUILayout.Button("Initialize Git (git init)"))
+                        SafeAction(GitInit);
+                    GUILayout.Space(6);
+                    DrawLog();
                     return;
                 }
 
-                EditorGUILayout.LabelField("Modified / Deleted / Added (tracked)", EditorStyles.miniBoldLabel);
-                if (_changed.Count == 0) EditorGUILayout.LabelField("• None");
-                foreach (var f in _changed)
+                static string BuildTipsText(string repoRoot)
                 {
-                    using (new EditorGUILayout.HorizontalScope())
-                    {
-                        bool picked = _selected.Contains(f.path);
-                        bool next = EditorGUILayout.ToggleLeft($"{f.code}  {f.path}", picked);
-                        if (next && !picked) _selected.Add(f.path);
-                        else if (!next && picked) _selected.Remove(f.path);
-
-                        if (GUILayout.Button("Diff", GUILayout.Width(60)))
-                            DiffFile(f.path);
-                    }
+                    var sb = new StringBuilder();
+                    sb.AppendLine("Tips & helpers:");
+                    sb.AppendLine("• Configure Git LFS (for large binaries):");
+                    sb.AppendLine("    git lfs install");
+                    sb.AppendLine("    git lfs track \"*.psd\" \"*.fbx\" \"*.wav\"");
+                    sb.AppendLine();
+                    sb.AppendLine("• Set VS Code as diff/merge tool:");
+                    sb.AppendLine("    git config diff.tool vscode");
+                    sb.AppendLine("    git config difftool.vscode.cmd \"code --wait --diff \\\"$LOCAL\\\" \\\"$REMOTE\\\"\"");
+                    sb.AppendLine("    git config merge.tool vscode");
+                    sb.AppendLine("    git config mergetool.vscode.cmd \"code --wait \\\"$MERGED\\\"\"");
+                    sb.AppendLine();
+                    if (!string.IsNullOrEmpty(repoRoot))
+                        sb.AppendLine($"• Repo root: {repoRoot}");
+                    sb.AppendLine("• Emoji tip: Windows + . opens the emoji panel 🙂");
+                    return sb.ToString();
                 }
 
+                DrawSummary();
+                GUILayout.Space(4);
+                DrawStatusArea();
                 GUILayout.Space(6);
-                EditorGUILayout.LabelField("Untracked", EditorStyles.miniBoldLabel);
-                if (_untracked.Count == 0) EditorGUILayout.LabelField("• None");
-                foreach (var f in _untracked)
-                {
-                    using (new EditorGUILayout.HorizontalScope())
-                    {
-                        bool picked = _selected.Contains(f.path);
-                        bool next = EditorGUILayout.ToggleLeft($"{f.code}  {f.path}", picked);
-                        if (next && !picked) _selected.Add(f.path);
-                        else if (!next && picked) _selected.Remove(f.path);
-
-                        if (GUILayout.Button("Open", GUILayout.Width(60)))
-                            OpenPath(f.path);
-                    }
-                }
-
+                DrawCommitArea();
                 GUILayout.Space(6);
-                using (new EditorGUILayout.HorizontalScope())
+                DrawBranchArea();
+                GUILayout.Space(6);
+                DrawRemotesArea();
+                GUILayout.Space(6);
+                DrawToolsArea();
+                GUILayout.Space(6);
+                DrawLog();
+            }
+        }
+
+        void DrawHeader()
+        {
+            GUILayout.Space(4);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("WS • Git & Share Hub", EditorStyles.boldLabel);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Refresh", GUILayout.Width(80)))
+                RefreshAll();
+            EditorGUILayout.EndHorizontal();
+
+            var hasGit = HasGitInPath(out var gitVersion);
+            EditorGUILayout.LabelField("Git:", hasGit ? gitVersion : "Not found in PATH");
+            if (!hasGit)
+            {
+                EditorGUILayout.HelpBox("Install Git (and restart Unity) OR ensure 'git' is in PATH.\nhttps://git-scm.com/downloads", MessageType.Error);
+            }
+        }
+
+        void DrawSummary()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Repository", _repoRoot);
+                EditorGUILayout.LabelField("Branch", string.IsNullOrEmpty(_branch) ? "(unknown)" : _branch);
+
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Open Repo Folder")) EditorUtility.RevealInFinder(_repoRoot.Replace('\\', '/'));
+                if (!string.IsNullOrEmpty(_originUrl) && Uri.IsWellFormedUriString(_originUrl, UriKind.Absolute))
                 {
-                    if (GUILayout.Button("Stage Selected")) StageSelected();
-                    if (GUILayout.Button("Unstage Selected")) UnstageSelected();
-                    if (GUILayout.Button("Discard Selected"))
+                    if (GUILayout.Button("Open Remote (origin)")) Application.OpenURL(_originUrl);
+                }
+                if (GUILayout.Button("Git Bash Here"))
+                {
+                    var bash = GuessGitBash();
+                    if (!string.IsNullOrEmpty(bash))
                     {
-                        if (EditorUtility.DisplayDialog("Discard selected?", "Revert changes and/or remove untracked for selected items?", "Yes", "Cancel"))
-                            DiscardSelected();
+                        var psi = new ProcessStartInfo
+                        {
+                            FileName = bash,
+                            WorkingDirectory = _repoRoot,
+                            UseShellExecute = true
+                        };
+                        Process.Start(psi);
                     }
-                    if (GUILayout.Button("Clear Selection")) _selected.Clear();
-                    GUILayout.FlexibleSpace();
-                    EditorGUILayout.LabelField($"Last refresh: {_lastRefresh:HH:mm:ss}", GUILayout.Width(180));
-                }
-            }
-        }
-
-        void BranchingBox()
-        {
-            EditorGUILayout.LabelField("Branching", EditorStyles.boldLabel);
-            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
-            {
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    _newBranch = EditorGUILayout.TextField("New Branch", _newBranch);
-                    GUI.enabled = !string.IsNullOrWhiteSpace(_newBranch);
-                    if (GUILayout.Button("Create & Switch", GUILayout.Width(150)))
+                    else
                     {
-                        GitSafe($"switch -c \"{_newBranch}\"");
-                        _newBranch = "";
-                        SafeRefresh();
+                        EditorUtility.DisplayDialog("Not Found", "Couldn't find Git Bash. Is Git for Windows installed?", "OK");
                     }
-                    GUI.enabled = true;
-                    if (GUILayout.Button("Switch to…", GUILayout.Width(110))) PromptSwitchBranch();
                 }
+                EditorGUILayout.EndHorizontal();
             }
         }
 
-        void StashBox()
+        void DrawStatusArea()
         {
-            EditorGUILayout.LabelField("Stash", EditorStyles.boldLabel);
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                _stashMessage = EditorGUILayout.TextField("Message", _stashMessage);
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    if (GUILayout.Button("Stash (incl. untracked)"))
-                        GitSafe($"stash push -u -m \"{_stashMessage}\"");
-                    if (GUILayout.Button("List")) GitSafe("stash list");
-                    if (GUILayout.Button("Pop")) GitSafe("stash pop");
-                    if (GUILayout.Button("Drop")) GitSafe("stash drop");
-                }
-            }
-        }
+                EditorGUILayout.LabelField("Working Tree", EditorStyles.boldLabel);
 
-        void ToolsBox()
-        {
-            EditorGUILayout.LabelField("Tools & Config", EditorStyles.boldLabel);
-            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
-            {
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    if (GUILayout.Button("Configure VS Code as difftool/mergetool"))
-                        ConfigureVSCodeDiffMerge();
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Stage All (git add -A)", GUILayout.Width(180)))
+                    SafeAction(StageAll);
+                if (GUILayout.Button("Unstage All (git reset)", GUILayout.Width(180)))
+                    SafeAction(UnstageAll);
+                if (GUILayout.Button("Discard Local Changes (git restore .)", GUILayout.Width(230)))
+                    SafeAction(DiscardAll);
+                EditorGUILayout.EndHorizontal();
 
-                    if (GUILayout.Button("Open .gitignore"))
-                        OpenPath(".gitignore");
-                }
-
-                // user config (local)
-                EditorGUILayout.Space(4);
-                EditorGUILayout.LabelField("Local user (this repo only)", EditorStyles.miniBoldLabel);
-                using (new EditorGUILayout.HorizontalScope())
+                GUILayout.Space(4);
+                using (var sv = new EditorGUILayout.ScrollViewScope(_svStatus, GUILayout.MinHeight(100)))
                 {
-                    _userName = EditorGUILayout.TextField("user.name", _userName);
-                    if (GUILayout.Button("Read", GUILayout.Width(60))) _userName = GitRead("config user.name");
-                    if (GUILayout.Button("Write", GUILayout.Width(60))) GitSafe($"config user.name \"{_userName}\"");
-                }
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    _userEmail = EditorGUILayout.TextField("user.email", _userEmail);
-                    if (GUILayout.Button("Read", GUILayout.Width(60))) _userEmail = GitRead("config user.email");
-                    if (GUILayout.Button("Write", GUILayout.Width(60))) GitSafe($"config user.email \"{_userEmail}\"");
-                }
-            }
-        }
-
-        void LogBox()
-        {
-            EditorGUILayout.LabelField("Log", EditorStyles.boldLabel);
-            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
-            {
-                var txt = _log.ToString();
-                EditorGUILayout.TextArea(txt, GUILayout.MinHeight(120));
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    if (GUILayout.Button("Copy Log"))
+                    _svStatus = sv.scrollPosition;
+                    if (_status.Count == 0)
                     {
-                        EditorGUIUtility.systemCopyBuffer = txt + "\n\nPs: Why did the commit go to therapy? Too many unresolved conflicts.";
-                        AppendLog("Log copied to clipboard. 🧠");
+                        GUILayout.Label("No changes. Working tree clean.");
                     }
-                    if (GUILayout.Button("Clear")) { _log.Clear(); }
+                    else
+                    {
+                        foreach (var s in _status)
+                        {
+                            GUILayout.BeginHorizontal();
+                            GUILayout.Label(s.Code, GUILayout.Width(40));
+                            GUILayout.Label(s.Path);
+                            if (!string.IsNullOrEmpty(s.Path2))
+                                GUILayout.Label("→ " + s.Path2);
+                            GUILayout.FlexibleSpace();
+
+                            if (GUILayout.Button("Stage", GUILayout.Width(60)))
+                                SafeAction(() => StagePath(s.Path2 ?? s.Path));
+                            if (GUILayout.Button("Unstage", GUILayout.Width(70)))
+                                SafeAction(() => UnstagePath(s.Path2 ?? s.Path));
+                            if (GUILayout.Button("Discard", GUILayout.Width(70)))
+                                SafeAction(() => DiscardPath(s.Path2 ?? s.Path));
+                            GUILayout.EndHorizontal();
+                        }
+                    }
                 }
             }
         }
 
-        // --- Actions ---
-
-        void Commit(string msg)
+        void DrawCommitArea()
         {
-            if (string.IsNullOrWhiteSpace(msg))
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                AppendLog("Commit message is empty.");
+                EditorGUILayout.LabelField("Commit", EditorStyles.boldLabel);
+                EditorGUI.BeginChangeCheck();
+                _commitMsg = EditorGUILayout.TextArea(_commitMsg, GUILayout.MinHeight(44));
+                if (EditorGUI.EndChangeCheck())
+                    EditorPrefs.SetString("WSGitHub.commitMsg", _commitMsg);
+
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Commit", GUILayout.Width(120)))
+                    SafeAction(CommitOnly);
+                if (GUILayout.Button("Commit + Push", GUILayout.Width(140)))
+                    SafeAction(CommitAndPush);
+                if (GUILayout.Button("Push", GUILayout.Width(80)))
+                    SafeAction(Push);
+                if (GUILayout.Button("Pull", GUILayout.Width(80)))
+                    SafeAction(Pull);
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.Space(2);
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Show Last 50 Commits"))
+                    SafeAction(LogLast50);
+                if (GUILayout.Button("Tag Current (v0.0.1)"))
+                    SafeAction(() => CreateTag("v0.0.1"));
+                EditorGUILayout.EndHorizontal();
+            }
+        }
+
+        void DrawBranchArea()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Branches", EditorStyles.boldLabel);
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label("New branch:", GUILayout.Width(90));
+                string newBranch = EditorGUILayout.TextField("", GUILayout.MinWidth(120));
+                if (GUILayout.Button("Create & Checkout", GUILayout.Width(160)) && !string.IsNullOrWhiteSpace(newBranch))
+                    SafeAction(() => CreateAndCheckout(newBranch));
+                EditorGUILayout.EndHorizontal();
+
+                if (GUILayout.Button("Checkout… (popup)"))
+                    SafeAction(ShowBranchPopup);
+            }
+        }
+
+        void DrawRemotesArea()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Remotes", EditorStyles.boldLabel);
+
+                // origin
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label("origin:", GUILayout.Width(60));
+                _originUrl = EditorGUILayout.TextField(_originUrl);
+                if (GUILayout.Button("Save", GUILayout.Width(70)))
+                    SafeAction(SetOriginRemote);
+                if (GUILayout.Button("Fetch", GUILayout.Width(70)))
+                    SafeAction(() => FetchRemote("origin"));
+                EditorGUILayout.EndHorizontal();
+
+                // mirror
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label("mirror:", GUILayout.Width(60));
+                _mirrorUrl = EditorGUILayout.TextField(_mirrorUrl);
+                if (GUILayout.Button("Save", GUILayout.Width(70)))
+                    SafeAction(SetMirrorRemote);
+                if (GUILayout.Button("Push → mirror", GUILayout.Width(120)))
+                    SafeAction(PushMirror);
+                EditorGUILayout.EndHorizontal();
+            }
+        }
+
+        void DrawToolsArea()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Tools", EditorStyles.boldLabel);
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Configure VS Code as diff/merge"))
+                    SafeAction(ConfigVsCodeDiffMerge);
+                if (GUILayout.Button("Write .gitattributes (line endings)"))
+                    SafeAction(WriteGitattributes);
+                EditorGUILayout.EndHorizontal();
+            }
+        }
+
+        void DrawLog()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Log", EditorStyles.boldLabel);
+                using (var sv = new EditorGUILayout.ScrollViewScope(_svLog, GUILayout.MinHeight(120)))
+                {
+                    _svLog = sv.scrollPosition;
+                    GUILayout.TextArea(_log.ToString(), GUILayout.ExpandHeight(true));
+                }
+                if (GUILayout.Button("Clear Log")) { _log.Length = 0; }
+            }
+        }
+
+        // --------- Actions ----------
+        void SafeAction(Action a)
+        {
+            if (_busy) return;
+            _busy = true;
+            try { a(); }
+            catch (Exception e) { AppendLog("[ERROR] " + e.Message); }
+            finally { _busy = false; Repaint(); }
+        }
+
+        void DetectRepoRoot()
+        {
+            // Use `git rev-parse --show-toplevel` when available
+            if (RunGit("rev-parse --show-toplevel", out var so, out var se))
+            {
+                _repoRoot = so.Trim().Replace('\\', '/');
+            }
+            else
+            {
+                // Fallback: walk up from project folder looking for .git
+                var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
+                while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, ".git")))
+                    dir = dir.Parent;
+                _repoRoot = dir?.FullName?.Replace('\\', '/') ?? "";
+            }
+            if (string.IsNullOrEmpty(_repoRoot))
+                AppendLog("[WARN] No .git found. Initialize to enable features.");
+        }
+
+        void RefreshAll(bool silent = false)
+        {
+            if (!_busy)
+            {
+                if (!silent) AppendLog("$ git rev-parse --abbrev-ref HEAD");
+                if (RunGit("rev-parse --abbrev-ref HEAD", out var so, out var se))
+                {
+                    _branch = so.Trim();
+                }
+                else _branch = "(unknown)";
+
+                RefreshRemotes();
+                RefreshStatus();
+            }
+        }
+
+        void RefreshStatus()
+        {
+            _status.Clear();
+            if (!RunGit("status --porcelain -z", out var so, out var se))
+            {
+                AppendLog(se);
                 return;
             }
-            // Stage nothing? Git will error. We try anyway so user sees message.
-            GitSafe("commit -m " + Quote(msg));
-            SafeRefresh();
-        }
 
-        void Push()
-        {
-            // Set upstream if needed
-            var hasUpstream = !string.IsNullOrEmpty(GitRead("rev-parse --abbrev-ref --symbolic-full-name @{u}", out var ok, quiet: true)) && ok;
-            if (!hasUpstream)
-                GitSafe($"push -u {_remoteName} {_currentBranch}");
-            else
-                GitSafe("push");
-            SafeRefresh();
-        }
-
-        void PullRebase()
-        {
-            GitSafe($"pull --rebase {_remoteName} {_currentBranch}");
-            SafeRefresh();
-        }
-
-        void StageAll() { GitSafe("add -A"); SafeRefresh(); }
-        void UnstageAll() { GitSafe("reset"); SafeRefresh(); }
-
-        void StageSelected()
-        {
-            foreach (var p in _selected.ToArray())
-                GitSafe($"add -- {Quote(p)}");
-            SafeRefresh();
-        }
-
-        void UnstageSelected()
-        {
-            foreach (var p in _selected.ToArray())
-                GitSafe($"restore --staged -- {Quote(p)}");
-            SafeRefresh();
-        }
-
-        void DiscardSelected()
-        {
-            foreach (var p in _selected.ToArray())
+            // Parse \0-separated records: each is "XY path" or "R? path\0path2"
+            var bytes = Encoding.UTF8.GetBytes(so);
+            int i = 0;
+            while (i < bytes.Length)
             {
-                // If untracked -> remove
-                if (_untracked.Any(u => u.path.Equals(p, StringComparison.OrdinalIgnoreCase)))
-                    SafeDeleteFile(p);
-                else
-                    GitSafe($"restore -- {Quote(p)}");
+                int j = i;
+                while (j < bytes.Length && bytes[j] != 0) j++;
+                if (j == i) { i++; continue; }
+                var rec = Encoding.UTF8.GetString(bytes, i, j - i);
+                i = j + 1;
+
+                // Porcelain v1: first two chars are status
+                if (rec.Length < 3) continue;
+                var code = rec.Substring(0, 2);
+                var rest = rec.Substring(3);
+
+                string path = rest;
+                string path2 = null;
+
+                // Handle rename/copy format: "R " or "C " then "old -> new" (porcelain prints separate NUL fields if -z)
+                if ((code.StartsWith("R") || code.StartsWith("C")) && i < bytes.Length)
+                {
+                    // Next token is the new path
+                    int k = i;
+                    while (k < bytes.Length && bytes[k] != 0) k++;
+                    path2 = Encoding.UTF8.GetString(bytes, i, k - i);
+                    i = k + 1;
+                }
+
+                _status.Add(new StatusEntry { Code = code, Path = path, Path2 = path2 });
             }
-            SafeRefresh();
+        }
+
+        void RefreshRemotes()
+        {
+            if (RunGit("remote get-url origin", out var so, out var se))
+                _originUrl = so.Trim();
+            if (RunGit("remote get-url mirror", out so, out se))
+                _mirrorUrl = so.Trim();
+        }
+
+        void GitInit()
+        {
+            var prj = Directory.GetCurrentDirectory().Replace('\\', '/');
+            var root = new DirectoryInfo(prj); // Unity project root
+            // We want to init at this folder (contains Assets/ Packages/ ProjectSettings/)
+            if (RunGit("init", out var so, out var se))
+            {
+                AppendLog(so);
+                DetectRepoRoot();
+                WriteGitignoreIfMissing();
+                AppendLog("Initialized repository.");
+            }
+            else AppendLog(se);
+        }
+
+        void StageAll()
+        {
+            AppendLog("$ git add -A");
+            if (!RunGit("add -A", out var so, out var se)) AppendLog(se);
+            else AppendLog(so);
+            RefreshStatus();
+        }
+
+        void UnstageAll()
+        {
+            AppendLog("$ git reset");
+            if (!RunGit("reset", out var so, out var se)) AppendLog(se);
+            else AppendLog(so);
+            RefreshStatus();
         }
 
         void DiscardAll()
         {
-            GitSafe("restore .");
-            GitSafe("clean -fd");
-            SafeRefresh();
+            if (!EditorUtility.DisplayDialog("Discard ALL changes?", "This will restore the working tree to last commit.\nUntracked files remain.", "Do it", "Cancel"))
+                return;
+
+            AppendLog("$ git restore --worktree -- .");
+            if (!RunGit("restore --worktree -- .", out var so, out var se)) AppendLog(se);
+            else AppendLog(so);
+            RefreshStatus();
         }
 
-        void DiffFile(string rel)
+        void StagePath(string path)
         {
-            // Try difftool, fallback to 'git diff'
-            var configured = GitRead("config diff.tool");
-            if (!string.IsNullOrEmpty(configured))
-                GitSafe($"difftool --no-prompt -- {Quote(rel)}");
+            if (string.IsNullOrEmpty(path)) return;
+            if (!RunGit($"add -- \"{path.Replace("\\", "/")}\"", out var so, out var se)) AppendLog(se);
+            RefreshStatus();
+        }
+
+        void UnstagePath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return;
+            if (!RunGit($"reset -- \"{path.Replace("\\", "/")}\"", out var so, out var se)) AppendLog(se);
+            RefreshStatus();
+        }
+
+        void DiscardPath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return;
+            if (!EditorUtility.DisplayDialog("Discard file changes?", path, "Restore", "Cancel")) return;
+            if (!RunGit($"restore --worktree -- \"{path.Replace("\\", "/")}\"", out var so, out var se)) AppendLog(se);
+            RefreshStatus();
+        }
+
+        void CommitOnly()
+        {
+            var msg = string.IsNullOrWhiteSpace(_commitMsg) ? "update" : _commitMsg.Trim();
+            AppendLog($"$ git commit -m \"{msg}\"");
+            if (!RunGit($"commit -m \"{EscapeQuotes(msg)}\"", out var so, out var se))
+            {
+                AppendLog(se);
+            }
             else
-                GitSafe($"diff -- {Quote(rel)}");
-        }
-
-        void OpenExternalGitGUI()
-        {
-            // Try GitHub Desktop or fallback to 'git gui'
-            try
             {
-                // GitHub Desktop uses URL protocol 'x-github-client://'
-                if (!string.IsNullOrEmpty(_repoRoot))
-                {
-                    // Try to open repo folder; Desktop usually hooks the protocol from shell.
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = _repoRoot,
-                        UseShellExecute = true
-                    });
-                }
-                else
-                {
-                    GitSafe("gui");
-                }
-            }
-            catch (Exception e) { AppendLog("GUI open failed: " + e.Message); }
-        }
-
-        void PromptSwitchBranch()
-        {
-            var list = GitRead("branch --format=\"%(refname:short)\"").Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            var picked = EditorUtility.DisplayDialogComplex("Switch Branch", "Choose a branch in the console list below.", "Show in Log", "Cancel", "Manual Enter");
-            if (picked == 0)
-            {
-                AppendLog("Branches:\n" + string.Join("\n", list));
-            }
-            else if (picked == 2)
-            {
-                var name = EditorUtility.DisplayDialogComplex("Manual", "Enter exact branch name in the Console (use 'SwitchBranch: <name>').", "OK", "Cancel", "Help");
-                AppendLog("SwitchBranch: (type in Console) e.g. SwitchBranch: feature/my-awesome-work");
+                AppendLog(so);
+                _commitMsg = ""; EditorPrefs.SetString("WSGitHub.commitMsg", _commitMsg);
+                RefreshStatus();
             }
         }
 
-        // --- Refresh & parsing ---
-        void SafeRefresh()
+        void CommitAndPush()
         {
-            if (string.IsNullOrEmpty(_repoRoot))
+            CommitOnly();
+            Push();
+        }
+
+        void Push()
+        {
+            var remote = string.IsNullOrEmpty(_originUrl) ? "origin" : "origin";
+            var branch = string.IsNullOrEmpty(_branch) ? "main" : _branch;
+            AppendLog($"$ git push {remote} {branch}");
+            if (!RunGit($"push {remote} {branch}", out var so, out var se)) AppendLog(se);
+            else AppendLog(so);
+        }
+
+        void Pull()
+        {
+            var remote = "origin";
+            var branch = string.IsNullOrEmpty(_branch) ? "main" : _branch;
+            AppendLog($"$ git pull {remote} {branch}");
+            if (!RunGit($"pull {remote} {branch}", out var so, out var se)) AppendLog(se);
+            else AppendLog(so);
+            RefreshStatus();
+        }
+
+        void LogLast50()
+        {
+            if (!RunGit("log --oneline -n 50", out var so, out var se)) AppendLog(se);
+            else AppendLog(so);
+        }
+
+        void CreateTag(string tag)
+        {
+            if (!RunGit($"tag {tag}", out var so, out var se)) AppendLog(se);
+            else AppendLog($"Created tag {tag}");
+        }
+
+        void CreateAndCheckout(string newBranch)
+        {
+            newBranch = newBranch.Trim();
+            if (string.IsNullOrEmpty(newBranch)) return;
+            if (!RunGit($"checkout -b {newBranch}", out var so, out var se)) AppendLog(se);
+            else { AppendLog(so); _branch = newBranch; }
+        }
+
+        void ShowBranchPopup()
+        {
+            if (!RunGit(@"for-each-ref --format=""%(refname:short)"" refs/heads", out var so, out var se))
             {
-                _repoRoot = TryFindRepoRoot(Application.dataPath);
-                if (string.IsNullOrEmpty(_repoRoot))
-                {
-                    AppendLog("Repo root not set. Select a folder that contains '.git'.");
-                    return;
-                }
+                AppendLog(se); return;
             }
-            if (!HasGit()) { AppendLog("Git not found on PATH."); return; }
-
-            _currentBranch = GitRead("rev-parse --abbrev-ref HEAD", out var ok1)?.Trim();
-            if (!ok1) _currentBranch = "(unknown)";
-            _remoteUrl = GitRead($"remote get-url {_remoteName}", out _, quiet: true);
-
-            ReadUserConfig();
-            ParseStatus();
-            _lastRefresh = DateTime.Now;
-        }
-
-        void ReadUserConfig()
-        {
-            _userName = GitRead("config user.name",  out _, quiet: true);
-            _userEmail = GitRead("config user.email", out _, quiet: true);
-        }
-
-        void ParseStatus()
-        {
-            _changed.Clear(); _untracked.Clear();
-
-            var raw = GitRead("status --porcelain");
-            var lines = raw.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var ln in lines)
+            var list = so.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var menu = new GenericMenu();
+            foreach (var b in list)
             {
-                // Format: XY<space>path
-                if (ln.Length < 4) continue;
-                var code = ln.Substring(0, 2);
-                var path = ln.Substring(3).Trim();
-                var entry = new FileEntry { code = code, path = path };
+                var bb = b.Trim();
+                menu.AddItem(new GUIContent(bb), bb == _branch, () => SafeAction(() => Checkout(bb)));
+            }
+            menu.DropDown(new Rect(Event.current.mousePosition, new Vector2(1, 1)));
+        }
 
-                if (code == "??") _untracked.Add(entry);
-                else _changed.Add(entry);
+        void Checkout(string b)
+        {
+            if (!RunGit($"checkout {b}", out var so, out var se)) AppendLog(se);
+            else { AppendLog(so); _branch = b; RefreshStatus(); }
+        }
+
+        void SetOriginRemote()
+        {
+            if (string.IsNullOrWhiteSpace(_originUrl))
+            {
+                AppendLog("[WARN] origin URL empty.");
+                return;
+            }
+
+            if (!RunGit("remote", out var so, out var se)) { AppendLog(se); return; }
+            if (so.Split('\n').Any(x => x.Trim() == "origin"))
+            {
+                RunGit($"remote set-url origin \"{_originUrl}\"", out var so2, out var se2);
+                AppendLog($"Set origin → {_originUrl}");
+            }
+            else
+            {
+                RunGit($"remote add origin \"{_originUrl}\"", out var so3, out var se3);
+                AppendLog($"Added origin → {_originUrl}");
             }
         }
 
-        // --- Utilities ---
-
-        void ConfigureVSCodeDiffMerge()
+        void SetMirrorRemote()
         {
-            // Configure for the current repo (local). VS Code must be installed and on PATH as 'code'.
-            // This is a friendly default that avoids the "No supported VCS diff tools" warning path.
-            GitSafe("config diff.tool vscode");
-            GitSafe("config difftool.vscode.cmd \"code --wait --diff \\\"$LOCAL\\\" \\\"$REMOTE\\\"\"");
-            GitSafe("config merge.tool vscode");
-            GitSafe("config mergetool.vscode.cmd \"code --wait \\\"$MERGED\\\"\"");
+            if (string.IsNullOrWhiteSpace(_mirrorUrl))
+            {
+                AppendLog("[WARN] mirror URL empty.");
+                return;
+            }
+            // Use a simple "mirror" remote (not --mirror push by default to be safer)
+            if (!RunGit("remote", out var so, out var se)) { AppendLog(se); return; }
+            if (so.Split('\n').Any(x => x.Trim() == "mirror"))
+                RunGit($"remote set-url mirror \"{_mirrorUrl}\"", out var so2, out var se2);
+            else
+                RunGit($"remote add mirror \"{_mirrorUrl}\"", out var so3, out var se3);
+
+            AppendLog($"Mirror set → {_mirrorUrl}");
+        }
+
+        void PushMirror()
+        {
+            if (string.IsNullOrWhiteSpace(_mirrorUrl))
+            {
+                AppendLog("[WARN] mirror URL not set.");
+                return;
+            }
+            // Safer default: normal push (not --mirror). Change to --mirror if you truly want a forced 1:1 mirror.
+            var b = string.IsNullOrEmpty(_branch) ? "main" : _branch;
+            if (!RunGit($"push mirror {b}", out var so, out var se)) AppendLog(se);
+            else AppendLog(so);
+        }
+
+        void FetchRemote(string name)
+        {
+            if (!RunGit($"fetch {name}", out var so, out var se)) AppendLog(se);
+            else AppendLog(so);
+        }
+
+        void ConfigVsCodeDiffMerge()
+        {
+            // Scope to this repo
+            RunGit("config --local diff.tool vscode", out _, out _);
+
+            // difftool: code --wait --diff "$LOCAL" "$REMOTE"
+            var diffCmd = "config --local difftool.vscode.cmd \"code --wait --diff \\\"$LOCAL\\\" \\\"$REMOTE\\\"\"";
+            RunGit(diffCmd, out _, out _);
+
+            // mergetool: code --wait "$MERGED"
+            RunGit("config --local merge.tool vscode", out _, out _);
+            var mergeCmd = "config --local mergetool.vscode.cmd \"code --wait \\\"$MERGED\\\"\"";
+            RunGit(mergeCmd, out _, out _);
+
             AppendLog("Configured VS Code as diff/merge tool for this repo.");
         }
 
-        static void SafeDeleteFile(string relPath)
+
+        void WriteGitattributes()
         {
-            try
-            {
-                var abs = Path.GetFullPath(relPath);
-                if (File.Exists(abs)) File.Delete(abs);
-                else if (Directory.Exists(abs)) Directory.Delete(abs, true);
-            }
-            catch (Exception e) { UnityEngine.Debug.LogWarning("Failed delete: " + relPath + " → " + e.Message); }
+            var path = Path.Combine(_repoRoot, ".gitattributes");
+            var content = string.Join("\n", new[]{
+                "# Normalize text files for cross-platform dev",
+                "* text=auto",
+                "",
+                "# Unity YAML / text assets should remain LF",
+                "*.cs text eol=lf",
+                "*.shader text eol=lf",
+                "*.compute text eol=lf",
+                "*.cginc text eol=lf",
+                "*.hlsl text eol=lf",
+                "*.json text eol=lf",
+                "*.xml text eol=lf",
+                "*.yaml text eol=lf",
+                "*.yml text eol=lf",
+                "*.asmdef text eol=lf",
+                "*.asset text eol=lf",
+                "*.meta text eol=lf",
+                "*.prefab text eol=lf",
+                "*.unity text eol=lf",
+                "",
+                "# Binary assets",
+                "*.png binary",
+                "*.jpg binary",
+                "*.jpeg binary",
+                "*.tga binary",
+                "*.psd binary",
+                "*.fbx binary",
+                "*.wav binary",
+                "*.mp3 binary",
+                "*.ogg binary"
+            });
+            File.WriteAllText(path, content, new UTF8Encoding(false));
+            AppendLog("Wrote .gitattributes");
+
+            // Stage and commit quickly (optional convenience)
+            RunGit("add .gitattributes", out var so, out var se);
+            RunGit(@"commit -m ""chore: add .gitattributes""", out so, out se);
         }
 
-        void OpenPath(string rel)
+        void WriteGitignoreIfMissing()
         {
-            try
-            {
-                var abs = Path.Combine(_repoRoot, rel).Replace('\\', '/');
-                if (File.Exists(abs) || Directory.Exists(abs))
-                    Process.Start(new ProcessStartInfo { FileName = abs, UseShellExecute = true });
-                else
-                    AppendLog("Path not found: " + rel);
-            }
-            catch (Exception e) { AppendLog("Open failed: " + e.Message); }
+            var p = Path.Combine(_repoRoot, ".gitignore");
+            if (File.Exists(p)) return;
+            var content = string.Join("\n", new[]{
+                "Library/",
+                "Temp/",
+                "Obj/",
+                "Build/",
+                "Builds/",
+                "Logs/",
+                "UserSettings/",
+                "MemoryCaptures/",
+                "*.csproj",
+                "*.sln",
+                "*.user",
+                ".idea/",
+                ".vs/",
+                ".vscode/",
+                ".DS_Store",
+                "Thumbs.db"
+            });
+            File.WriteAllText(p, content, new UTF8Encoding(false));
+            AppendLog("Wrote .gitignore (Unity slim).");
+            RunGit("add .gitignore", out var so, out var se);
+            RunGit(@"commit -m ""chore: add .gitignore""", out so, out se);
         }
 
-        bool HasGit()
+        // --------- Shell helpers ----------
+        void AppendLog(string msg)
         {
-            try
-            {
-                var p = new Process();
-                p.StartInfo = new ProcessStartInfo
-                {
-                    FileName = "git",
-                    Arguments = "--version",
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                };
-                p.Start();
-                p.WaitForExit(4000);
-                return p.ExitCode == 0;
-            }
-            catch { return false; }
+            if (string.IsNullOrEmpty(msg)) return;
+            _log.AppendLine(msg);
+            Repaint();
         }
 
-        string Quote(string s) => "\"" + s.Replace("\"", "\\\"") + "\"";
+        static string EscapeQuotes(string s) => s?.Replace("\"", "\\\"") ?? "";
 
-        void GitSafe(string args)
+        bool RunGit(string args, out string stdout, out string stderr, int timeoutMs = DefaultTimeoutMs)
         {
-            var ok = RunGit(args, out var so, out var se);
-            AppendLog($"$ git {args}\n{so}{(string.IsNullOrEmpty(se) ? "" : "\n" + se)}");
-            if (!ok) AppendLog("Command failed.");
-        }
-
-        string GitRead(string args,  out bool ok, bool quiet = false)
-        {
-            ok = RunGit(args, out var so, out var se);
-            if (!quiet) AppendLog($"$ git {args}\n{so}{(string.IsNullOrEmpty(se) ? "" : "\n" + se)}");
-            return ok ? so.Trim() : "";
-        }
-        string GitRead(string args) => GitRead(args,  out _, quiet: false);
-
-        // Drop-in replacement: put both into WSUltimateGitHubWindow.cs
-        // Overload without timeout -> uses the default 120s
-        bool RunGit(string args, out string stdout, out string stderr)
-        {
-            return RunGit(args, out stdout, out stderr, 120000);
-        }
-
-        // Overload with explicit timeout
-        bool RunGit(string args, out string stdout, out string stderr, int timeoutMs)
-        {
-            stdout = "";
-            stderr = "";
+            stdout = ""; stderr = "";
             if (string.IsNullOrEmpty(_repoRoot)) { stderr = "Repo root not set."; return false; }
 
             try
             {
-                var psi = new System.Diagnostics.ProcessStartInfo
+                var psi = new ProcessStartInfo
                 {
                     FileName = "git",
                     Arguments = args,
@@ -634,42 +744,71 @@ namespace WildSurvival.EditorTools
                     StandardOutputEncoding = Encoding.UTF8,
                     StandardErrorEncoding = Encoding.UTF8
                 };
+                using var p = new Process { StartInfo = psi };
+                var so = new StringBuilder();
+                var se = new StringBuilder();
+                p.OutputDataReceived += (_, e) => { if (e.Data != null) so.AppendLine(e.Data); };
+                p.ErrorDataReceived += (_, e) => { if (e.Data != null) se.AppendLine(e.Data); };
+                p.Start();
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
 
-                using (var p = new System.Diagnostics.Process { StartInfo = psi })
+                if (!p.WaitForExit(timeoutMs))
                 {
-                    var so = new StringBuilder();
-                    var se = new StringBuilder();
-
-                    p.OutputDataReceived += (_, e) => { if (e.Data != null) so.AppendLine(e.Data); };
-                    p.ErrorDataReceived += (_, e) => { if (e.Data != null) se.AppendLine(e.Data); };
-
-                    p.Start();
-                    p.BeginOutputReadLine();
-                    p.BeginErrorReadLine();
-
-                    if (!p.WaitForExit(timeoutMs))
-                    {
-                        try { p.Kill(); } catch { /* ignore */ }
-                    }
-
-                    stdout = so.ToString();
-                    stderr = se.ToString();
-
-                    return p.ExitCode == 0;
+                    try { p.Kill(); } catch { }
+                    se.AppendLine($"git '{args}' timed out after {timeoutMs} ms");
                 }
+
+                stdout = so.ToString();
+                stderr = se.ToString();
+
+                // Echo command + result to UI log (shorten noisy outputs)
+                var head = args.Length > 160 ? args.Substring(0, 160) + "…" : args;
+                AppendLog($"$ git {head}");
+                if (!string.IsNullOrEmpty(stdout)) AppendLog(Clamp(stdout, 4000));
+                if (!string.IsNullOrEmpty(stderr)) AppendLog(Clamp(stderr, 4000));
+
+                return p.ExitCode == 0 && string.IsNullOrEmpty(stderr);
             }
             catch (Exception e)
             {
                 stderr = e.Message;
+                AppendLog("[EXC] " + e.Message);
                 return false;
             }
         }
 
+        static string Clamp(string s, int max) => s.Length <= max ? s : s.Substring(0, max) + "\n…(truncated)…";
 
-        void AppendLog(string line)
+        static bool HasGitInPath(out string version)
         {
-            _log.AppendLine(line);
-            Repaint();
+            version = "";
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "git",
+                    Arguments = "--version",
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true
+                };
+                using var p = Process.Start(psi);
+                version = p.StandardOutput.ReadToEnd().Trim();
+                p.WaitForExit(2000);
+                return p.ExitCode == 0 && version.StartsWith("git version");
+            }
+            catch { return false; }
+        }
+
+        static string GuessGitBash()
+        {
+            // Common default Git for Windows path. We avoid registry for simplicity.
+            var p1 = @"C:\Program Files\Git\git-bash.exe";
+            var p2 = @"C:\Program Files (x86)\Git\git-bash.exe";
+            if (File.Exists(p1)) return p1;
+            if (File.Exists(p2)) return p2;
+            return null;
         }
     }
 }
