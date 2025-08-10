@@ -1,0 +1,25 @@
+# Unity (slim)
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+UserSettings/
+MemoryCaptures/
+*.csproj
+*.sln
+*.user
+*.pidb
+*.svd
+*.pdb
+*.mdb
+*.opendb
+.sysinfo
+# Rider / VS / VSCode
+.idea/
+.vs/
+.vscode/
+# OS
+.DS_Store
+Thumbs.db
