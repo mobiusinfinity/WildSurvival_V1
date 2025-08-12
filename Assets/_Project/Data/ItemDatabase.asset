@@ -11,5 +11,5 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 0}
   m_Name: ItemDatabase
-  m_EditorClassIdentifier: Assembly-CSharp-Editor:WildSurvival.Editor.Tools:ItemDatabase
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::ItemDatabase
   items: []

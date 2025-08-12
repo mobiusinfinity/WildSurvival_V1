@@ -1,0 +1,86 @@
+Wild Survival Menu Issues Report
+=====================================
+
+File: QuickAccessMenu.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_Project\Code\Editor\Tools\QuickAccessMenu.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: SimpleAsmdefFix.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_Project\Code\Editor\Tools\SimpleAsmdefFix.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: ErrorReporterMenuFix.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\ErrorReporterMenuFix.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: MenuItemScanner.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\MenuItemScanner.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: QuickToolTest.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\QuickToolTest.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: CompleteProjectRestructure.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\CompleteProjectRestructure\CompleteProjectRestructure.cs
+Issues:
+  - Contains namespace WildSurvival.*
+  - Contains using WildSurvival.*
+
+File: ErrorReporter.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\ErrorReporter\ErrorReporter.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: ProjectCleanupAndFix.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\ProjectCleanupAndFix\ProjectCleanupAndFix.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: WildSurvivalProjectManager.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\ProjectManager\WildSurvivalProjectManager.cs
+Issues:
+  - Contains namespace WildSurvival.*
+  - Contains using WildSurvival.*
+
+File: ProjectTreeGenerator.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\ProjectTreeGenerator\ProjectTreeGenerator.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: WildSurvivalDatabaseGenerator.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\UltimateInventoryTool\WildSurvivalDatabaseGenerator.cs
+Issues:
+  - Contains namespace WildSurvival.*
+  - Contains using WildSurvival.*
+
+File: WildSurvivalSetup.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\UltimateInventoryTool\WildSurvivalSetup.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: WildSurvivalFileManager.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\WildSurvivalFileManager\WildSurvivalFileManager.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: WildSurvivalHub.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\WildSurvivalHub\WildSurvivalHub.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: WildSurvivalProgressQuest.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\WildSurvivalProgressQuest\WildSurvivalProgressQuest.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
+File: WSUltimateGitHubWindow.cs
+Path: C:/Users/maxca/Unity_Projects/ML/WildSurvival_V1.1/Assets\_WildSurvival\Code\Editor\Tools\WSUltimateGitHubWindow\WSUltimateGitHubWindow.cs
+Issues:
+  - Contains namespace WildSurvival.*
+
