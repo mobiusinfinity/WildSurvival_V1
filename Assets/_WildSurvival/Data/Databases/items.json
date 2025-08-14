@@ -1,0 +1,10 @@
+[
+  {"id": "wood", "name": "Wood", "stackSize": 20},
+  {"id": "stone", "name": "Stone", "stackSize": 15},
+  {"id": "fiber", "name": "Plant Fiber", "stackSize": 50},
+  {"id": "rope", "name": "Rope", "stackSize": 10},
+  {"id": "cloth", "name": "Cloth", "stackSize": 30},
+  {"id": "planks", "name": "Wood Planks", "stackSize": 15},
+  {"id": "raw_meat", "name": "Raw Meat", "stackSize": 10},
+  {"id": "cooked_meat", "name": "Cooked Meat", "stackSize": 10}
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "recipe_stone_axe",
+    "output": "stone_axe",
+    "inputs": [{"id": "wood", "amount": 2}, {"id": "stone", "amount": 3}]
+  },
+  {
+    "id": "recipe_rope",
+    "output": "rope",
+    "inputs": [{"id": "fiber", "amount": 3}]
+  },
+  {
+    "id": "recipe_campfire",
+    "output": "campfire",
+    "inputs": [{"id": "wood", "amount": 3}, {"id": "stone", "amount": 5}]
+  },
+  {
+    "id": "recipe_planks",
+    "output": "planks",
+    "inputs": [{"id": "wood", "amount": 1}]
+  }
+]

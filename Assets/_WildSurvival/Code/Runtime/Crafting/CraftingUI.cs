@@ -59,6 +59,22 @@ public class CraftingUI : MonoBehaviour
     [SerializeField] private float fadeSpeed = 0.3f;
     [SerializeField] private AnimationCurve openCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
+    [Header("UI Messages")]
+    [SerializeField] private GameObject noRecipesMessage;
+    [SerializeField] private TextMeshProUGUI notificationText;
+
+    // Additional references that might be missing
+    private Transform recipeContainer => recipeListContainer; // Use recipeListContainer as container
+
+    // Notification type enum if missing
+    public enum NotificationType
+    {
+        Info,
+        Success,
+        Warning,
+        Error
+    }
+
     // References
     private CraftingManager craftingManager;
     private InventoryManager inventoryManager;
@@ -81,6 +97,28 @@ public class CraftingUI : MonoBehaviour
 
     private void Awake()
     {
+        // AUTO-CREATE PANEL IF MISSING
+        if (craftingPanel == null)
+        {
+            // Create a basic panel
+            craftingPanel = new GameObject("CraftingPanel");
+            craftingPanel.transform.SetParent(transform, false);
+
+            // Add RectTransform
+            var rect = craftingPanel.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.25f, 0.25f);
+            rect.anchorMax = new Vector2(0.75f, 0.75f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            // Add a background image
+            var img = craftingPanel.AddComponent<UnityEngine.UI.Image>();
+            img.color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
+
+            Debug.Log("[CraftingUI] Auto-created crafting panel");
+        }
+
+        // Rest of existing Awake code...
         canvasGroup = craftingPanel.GetComponent<CanvasGroup>();
         if (canvasGroup == null)
         {
@@ -148,13 +186,13 @@ public class CraftingUI : MonoBehaviour
 
     private void Update()
     {
-        // Toggle UI with C key (configurable)
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            ToggleUI();
-        }
+        // Remove this part:
+        // if (Input.GetKeyDown(KeyCode.C))
+        // {
+        //     ToggleUI();
+        // }
 
-        // Update crafting button state
+        // Keep this part:
         if (isOpen && selectedRecipe != null)
         {
             UpdateCraftButton();
@@ -172,7 +210,7 @@ public class CraftingUI : MonoBehaviour
         quantitySlider.value = 1;
     }
 
-    public void ToggleUI()
+    public void ToggleUI()  
     {
         if (isOpen)
             Close();
@@ -206,15 +244,19 @@ public class CraftingUI : MonoBehaviour
 
         isOpen = false;
 
-        // Cancel any ongoing crafting - Fixed: use property not method
-        if (craftingManager.IsCrafting)
+        // Cancel any ongoing crafting
+        if (craftingManager != null && craftingManager.IsCrafting)
         {
             craftingManager.CancelCrafting();
         }
 
-        // Animate closing
-        if (animationCoroutine != null) StopCoroutine(animationCoroutine);
-        animationCoroutine = StartCoroutine(AnimateClose());
+        // Animate closing - ADD NULL CHECK
+        if (animationCoroutine != null)
+            StopCoroutine(animationCoroutine);
+
+        // ADD NULL CHECK HERE
+        if (craftingPanel != null)
+            animationCoroutine = StartCoroutine(AnimateClose());
     }
 
     private IEnumerator AnimateOpen()
@@ -357,7 +399,12 @@ public class CraftingUI : MonoBehaviour
 
     public void RefreshRecipeList()
     {
-        if (craftingManager == null) return;
+
+        if (craftingManager == null)
+        {
+            Debug.LogWarning("[CraftingUI] CraftingManager is null");
+            return;
+        }
 
         // Get recipes from manager
         availableRecipes = craftingManager.GetAvailableRecipes();
@@ -608,14 +655,66 @@ public class CraftingUI : MonoBehaviour
         }
     }
 
-    private void OnCraftButtonClicked()
+    public void OnCraftButtonClicked()
     {
-        if (selectedRecipe == null || craftingManager == null) return;
+        // Check if recipe is selected
+        if (selectedRecipe == null)
+        {
+            Debug.LogWarning("[CraftingUI] Cannot craft - no recipe selected");
+            ShowNotification("Please select a recipe first!");
+            return;
+        }
 
+        // Check if CraftingManager exists
+        if (craftingManager == null)
+        {
+            Debug.LogError("[CraftingUI] CraftingManager is null!");
+            return;
+        }
+
+        // Get quantity to craft
         int quantity = Mathf.RoundToInt(quantitySlider.value);
 
-        // Fixed: Pass recipe object, not just ID
+        // Use the correct method name
+        Debug.Log($"[CraftingUI] Attempting to craft: {selectedRecipe.displayName}");
+
+        // Start crafting with the correct method
         craftingManager.StartCrafting(selectedRecipe, quantity);
+    }
+
+    private void ShowNotification(string message)
+    {
+        Debug.Log($"[CraftingUI] {message}");
+
+        if (notificationText != null)
+        {
+            notificationText.text = message;
+            notificationText.gameObject.SetActive(true);
+            CancelInvoke(nameof(HideNotification));
+            Invoke(nameof(HideNotification), 3f);
+        }
+
+        // If we have a notification system, use it
+        if (notifications != null)
+        {
+            // Just log for now since NotificationType might not match
+            Debug.Log($"[CraftingUI] Notification: {message}");
+        }
+    }
+
+    // Update the overloaded version:
+    private void ShowNotification(string message, NotificationType type)
+    {
+        // Just call the simple version
+        ShowNotification(message);
+    }
+
+    private void HideNotification()
+    {
+        if (notificationText != null)
+        {
+            notificationText.gameObject.SetActive(false);
+        }
     }
 
     private void OnCancelButtonClicked()
@@ -747,17 +846,13 @@ public class CraftingUI : MonoBehaviour
         return Resources.Load<ItemData>($"Items/{itemID}");
     }
 
-    private void ShowNotification(string message, NotificationType type)
+    private void DisplayRecipe(CraftingRecipe recipe)
     {
-        if (notifications != null)
-        {
-            notifications.ShowNotification(message, type);
-        }
-        else
-        {
-            Debug.Log($"[CraftingUI] {type}: {message}");
-        }
+        if (recipe == null) return;
+        CreateRecipeUIItem(recipe);
     }
+
+    public bool IsOpen => isOpen;
 }
 
 // Helper component for recipe list items
@@ -826,7 +921,11 @@ public class RecipeUIItem : MonoBehaviour, IPointerClickHandler
             craftingUI.SelectRecipe(recipe);
         }
     }
+
+    
 }
+
+
 
 // Helper component for ingredient slots
 public class IngredientSlot : MonoBehaviour

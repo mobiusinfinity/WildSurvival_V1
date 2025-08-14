@@ -1,5 +1,5 @@
 PROJECT STRUCTURE
-Generated: 2025-08-12 19:45:35
+Generated: 2025-08-14 22:31:13
 Root: Assets
 ==================================================
 
@@ -23,8 +23,8 @@ Assets
 │   ├── 📁 Code [2 files]
 │   │   ├── 📁 Editor [2 files]
 │   │   │   └── 📁 Tools [2 files]
-│   │   │       ├── 📄 QuickAccessMenu.cs (494.00 B)
-│   │   │       └── 📄 SimpleAsmdefFix.cs (8.25 KB)
+│   │   │       ├── 📄 QuickAccessMenu.cs (559.00 B)
+│   │   │       └── 📄 SimpleAsmdefFix.cs (8.32 KB)
 │   │   └── 📁 Runtime
 │   │       ├── 📁 Gameplay
 │   │       ├── 📁 Systems
@@ -44,7 +44,7 @@ Assets
 │   ├── 📁 Editor
 │   └── 📁 Runtime
 ├── 📁 _ThirdParty
-├── 📁 _WildSurvival [73 files]
+├── 📁 _WildSurvival [192 files]
 │   ├── 📁 Audio
 │   │   ├── 📁 Music
 │   │   │   ├── 📁 Ambient
@@ -54,33 +54,42 @@ Assets
 │   │       ├── 📁 Player
 │   │       ├── 📁 UI
 │   │       └── 📁 Wildlife
-│   ├── 📁 Code [59 files]
-│   │   ├── 📁 Editor [19 files]
+│   ├── 📁 Code [66 files]
+│   │   ├── 📁 Editor [26 files]
 │   │   │   ├── 📁 PropertyDrawers
-│   │   │   ├── 📁 Tools [19 files]
+│   │   │   ├── 📁 Tools [26 files]
+│   │   │   │   ├── 📁 BatchProcessor [2 files]
+│   │   │   │   │   ├── 📦 MasterItemDatabase.asset (419.00 B)
+│   │   │   │   │   └── 📄 UltimateBatchProcessor.cs (38.83 KB)
 │   │   │   │   ├── 📁 BuildPipeline
+│   │   │   │   ├── 📁 CompleteInventoryToolHub [1 files]
+│   │   │   │   │   └── 📄 CompleteInventoryToolHub.cs (44.64 KB)
 │   │   │   │   ├── 📁 CompleteProjectRestructure [1 files]
-│   │   │   │   │   └── 📄 CompleteProjectRestructure.cs (66.10 KB)
+│   │   │   │   │   └── 📄 CompleteProjectRestructure.cs (66.63 KB)
 │   │   │   │   ├── 📁 Database
 │   │   │   │   ├── 📁 Debug
 │   │   │   │   ├── 📁 ErrorReporter [1 files]
-│   │   │   │   │   └── 📄 ErrorReporter.cs (39.12 KB)
+│   │   │   │   │   └── 📄 ErrorReporter.cs (39.18 KB)
 │   │   │   │   ├── 📁 InventoryTool
+│   │   │   │   ├── 📁 MenuFixer [1 files]
+│   │   │   │   │   └── 📄 WildSurvivalMenuFixer.cs (13.76 KB)
 │   │   │   │   ├── 📁 MigrationAssistant [1 files]
 │   │   │   │   │   └── 📄 WildSurvivalMigrationAssistant.cs (15.23 KB)
 │   │   │   │   ├── 📁 ProgressQuest
 │   │   │   │   ├── 📁 ProjectCleanupAndFix [1 files]
-│   │   │   │   │   └── 📄 ProjectCleanupAndFix.cs (25.56 KB)
+│   │   │   │   │   └── 📄 ProjectCleanupAndFix.cs (25.75 KB)
 │   │   │   │   ├── 📁 ProjectCleanupTool [1 files]
 │   │   │   │   │   └── 📄 ProjectCleanupTool.cs (2.32 KB)
 │   │   │   │   ├── 📁 ProjectHub
 │   │   │   │   ├── 📁 ProjectManager [1 files]
-│   │   │   │   │   └── 📄 WildSurvivalProjectManager.cs (56.63 KB)
+│   │   │   │   │   └── 📄 WildSurvivalProjectManager.cs (56.79 KB)
 │   │   │   │   ├── 📁 ProjectRestructuringTool [1 files]
 │   │   │   │   │   └── 📄 ProjectRestructuringTool.cs (311.00 B)
 │   │   │   │   ├── 📁 ProjectStructure
 │   │   │   │   ├── 📁 ProjectTreeGenerator [1 files]
-│   │   │   │   │   └── 📄 ProjectTreeGenerator.cs (31.58 KB)
+│   │   │   │   │   └── 📄 ProjectTreeGenerator.cs (31.64 KB)
+│   │   │   │   ├── 📁 TestRecipeCreator [1 files]
+│   │   │   │   │   └── 📄 TestRecipeCreator.cs (9.03 KB)
 │   │   │   │   ├── 📁 TreeGenerator
 │   │   │   │   ├── 📁 UltimateInventoryTool [3 files]
 │   │   │   │   │   ├── 📄 UltimateInventoryTool.cs (43.71 KB)
@@ -88,17 +97,20 @@ Assets
 │   │   │   │   │   └── 📄 WildSurvivalSetup.cs (3.80 KB)
 │   │   │   │   ├── 📁 Utilities
 │   │   │   │   ├── 📁 WildSurvivalFileManager [1 files]
-│   │   │   │   │   └── 📄 WildSurvivalFileManager.cs (130.08 KB)
+│   │   │   │   │   └── 📄 WildSurvivalFileManager.cs (130.14 KB)
 │   │   │   │   ├── 📁 WildSurvivalHub [1 files]
-│   │   │   │   │   └── 📄 WildSurvivalHub.cs (36.48 KB)
+│   │   │   │   │   └── 📄 WildSurvivalHub.cs (36.54 KB)
 │   │   │   │   ├── 📁 WildSurvivalProgressQuest [1 files]
-│   │   │   │   │   └── 📄 WildSurvivalProgressQuest.cs (75.58 KB)
+│   │   │   │   │   └── 📄 WildSurvivalProgressQuest.cs (75.64 KB)
+│   │   │   │   ├── 📁 WorkingInventorySystem [1 files]
+│   │   │   │   │   └── 📄 WorkingInventorySystem.cs (40.93 KB)
 │   │   │   │   ├── 📁 WSUltimateGitHubWindow [1 files]
-│   │   │   │   │   └── 📄 WSUltimateGitHubWindow.cs (39.73 KB)
-│   │   │   │   ├── 📄 ErrorReporterMenuFix.cs (6.80 KB)
+│   │   │   │   │   └── 📄 WSUltimateGitHubWindow.cs (39.79 KB)
+│   │   │   │   ├── 📄 ErrorReporterMenuFix.cs (6.86 KB)
 │   │   │   │   ├── 📄 ErrorReporterPatch.cs (305.00 B)
-│   │   │   │   ├── 📄 MenuItemScanner.cs (5.74 KB)
-│   │   │   │   └── 📄 QuickToolTest.cs (4.59 KB)
+│   │   │   │   ├── 📄 MenuItemScanner.cs (5.80 KB)
+│   │   │   │   ├── 📄 QuickToolTest.cs (4.65 KB)
+│   │   │   │   └── 📄 UltimateInventoryToolHub.cs (103.39 KB)
 │   │   │   ├── 📁 Validators
 │   │   │   └── 📁 Windows
 │   │   └── 📁 Runtime [40 files]
@@ -130,7 +142,7 @@ Assets
 │   │       │   ├── 📄 CraftingManager.cs (14.50 KB)
 │   │       │   ├── 📄 CraftingRecipe.cs (10.70 KB)
 │   │       │   ├── 📄 CraftingSystemBridge.cs (15.82 KB)
-│   │       │   ├── 📄 CraftingUI.cs (26.59 KB)
+│   │       │   ├── 📄 CraftingUI.cs (28.54 KB)
 │   │       │   └── 📄 WorkbenchSystem.cs (19.82 KB)
 │   │       ├── 📁 Data [5 files]
 │   │       │   ├── 📁 Databases [2 files]
@@ -174,7 +186,7 @@ Assets
 │   │       │   │   │   └── 📄 ItemTypeExtensionsAddon.cs (1.99 KB)
 │   │       │   │   └── 📁 UI [4 files]
 │   │       │   │       ├── 📄 InventorySlotUI.cs (8.50 KB)
-│   │       │   │       ├── 📄 InventoryUI.cs (5.81 KB)
+│   │       │   │       ├── 📄 InventoryUI.cs (10.90 KB)
 │   │       │   │       ├── 📄 ItemDragHandler.cs (4.13 KB)
 │   │       │   │       └── 📄 SpatialInventoryGrid.cs (9.18 KB)
 │   │       │   ├── 📁 StatusEffects [1 files]
@@ -226,13 +238,126 @@ Assets
 │   │   └── 📁 Structures
 │   │       ├── 📁 Crafting
 │   │       └── 📁 Shelters
-│   ├── 📁 Data [3 files]
+│   ├── 📁 Data [115 files]
 │   │   ├── 📁 Biomes
-│   │   ├── 📁 Items [3 files]
+│   │   ├── 📁 Databases [4 files]
+│   │   │   ├── 📦 Items.asset (411.00 B)
+│   │   │   ├── 📦 MasterItemDatabase.asset (399.00 B)
+│   │   │   ├── 📦 MasterRecipeDatabase.asset (405.00 B)
+│   │   │   └── 📦 Recipes.asset (417.00 B)
+│   │   ├── 📁 Items [103 files]
+│   │   │   ├── 📦 Generated_0.asset (643.00 B)
+│   │   │   ├── 📦 Generated_1.asset (641.00 B)
+│   │   │   ├── 📦 Generated_10.asset (645.00 B)
+│   │   │   ├── 📦 Generated_11.asset (646.00 B)
+│   │   │   ├── 📦 Generated_12.asset (646.00 B)
+│   │   │   ├── 📦 Generated_13.asset (644.00 B)
+│   │   │   ├── 📦 Generated_14.asset (645.00 B)
+│   │   │   ├── 📦 Generated_15.asset (646.00 B)
+│   │   │   ├── 📦 Generated_16.asset (645.00 B)
+│   │   │   ├── 📦 Generated_17.asset (646.00 B)
+│   │   │   ├── 📦 Generated_18.asset (646.00 B)
+│   │   │   ├── 📦 Generated_19.asset (646.00 B)
+│   │   │   ├── 📦 Generated_2.asset (643.00 B)
+│   │   │   ├── 📦 Generated_20.asset (646.00 B)
+│   │   │   ├── 📦 Generated_21.asset (646.00 B)
+│   │   │   ├── 📦 Generated_22.asset (645.00 B)
+│   │   │   ├── 📦 Generated_23.asset (645.00 B)
+│   │   │   ├── 📦 Generated_24.asset (645.00 B)
+│   │   │   ├── 📦 Generated_25.asset (646.00 B)
+│   │   │   ├── 📦 Generated_26.asset (644.00 B)
+│   │   │   ├── 📦 Generated_27.asset (646.00 B)
+│   │   │   ├── 📦 Generated_28.asset (647.00 B)
+│   │   │   ├── 📦 Generated_29.asset (645.00 B)
+│   │   │   ├── 📦 Generated_3.asset (642.00 B)
+│   │   │   ├── 📦 Generated_30.asset (646.00 B)
+│   │   │   ├── 📦 Generated_31.asset (645.00 B)
+│   │   │   ├── 📦 Generated_32.asset (646.00 B)
+│   │   │   ├── 📦 Generated_33.asset (645.00 B)
+│   │   │   ├── 📦 Generated_34.asset (645.00 B)
+│   │   │   ├── 📦 Generated_35.asset (645.00 B)
+│   │   │   ├── 📦 Generated_36.asset (646.00 B)
+│   │   │   ├── 📦 Generated_37.asset (646.00 B)
+│   │   │   ├── 📦 Generated_38.asset (645.00 B)
+│   │   │   ├── 📦 Generated_39.asset (645.00 B)
+│   │   │   ├── 📦 Generated_4.asset (641.00 B)
+│   │   │   ├── 📦 Generated_40.asset (646.00 B)
+│   │   │   ├── 📦 Generated_41.asset (644.00 B)
+│   │   │   ├── 📦 Generated_42.asset (645.00 B)
+│   │   │   ├── 📦 Generated_43.asset (644.00 B)
+│   │   │   ├── 📦 Generated_44.asset (645.00 B)
+│   │   │   ├── 📦 Generated_45.asset (645.00 B)
+│   │   │   ├── 📦 Generated_46.asset (645.00 B)
+│   │   │   ├── 📦 Generated_47.asset (646.00 B)
+│   │   │   ├── 📦 Generated_48.asset (645.00 B)
+│   │   │   ├── 📦 Generated_49.asset (645.00 B)
+│   │   │   ├── 📦 Generated_5.asset (642.00 B)
+│   │   │   ├── 📦 Generated_50.asset (646.00 B)
+│   │   │   ├── 📦 Generated_51.asset (645.00 B)
+│   │   │   ├── 📦 Generated_52.asset (646.00 B)
+│   │   │   ├── 📦 Generated_53.asset (646.00 B)
+│   │   │   ├── 📦 Generated_54.asset (646.00 B)
+│   │   │   ├── 📦 Generated_55.asset (646.00 B)
+│   │   │   ├── 📦 Generated_56.asset (645.00 B)
+│   │   │   ├── 📦 Generated_57.asset (646.00 B)
+│   │   │   ├── 📦 Generated_58.asset (646.00 B)
+│   │   │   ├── 📦 Generated_59.asset (646.00 B)
+│   │   │   ├── 📦 Generated_6.asset (641.00 B)
+│   │   │   ├── 📦 Generated_60.asset (645.00 B)
+│   │   │   ├── 📦 Generated_61.asset (644.00 B)
+│   │   │   ├── 📦 Generated_62.asset (646.00 B)
+│   │   │   ├── 📦 Generated_63.asset (646.00 B)
+│   │   │   ├── 📦 Generated_64.asset (645.00 B)
+│   │   │   ├── 📦 Generated_65.asset (645.00 B)
+│   │   │   ├── 📦 Generated_66.asset (646.00 B)
+│   │   │   ├── 📦 Generated_67.asset (646.00 B)
+│   │   │   ├── 📦 Generated_68.asset (645.00 B)
+│   │   │   ├── 📦 Generated_69.asset (646.00 B)
+│   │   │   ├── 📦 Generated_7.asset (640.00 B)
+│   │   │   ├── 📦 Generated_70.asset (645.00 B)
+│   │   │   ├── 📦 Generated_71.asset (645.00 B)
+│   │   │   ├── 📦 Generated_72.asset (645.00 B)
+│   │   │   ├── 📦 Generated_73.asset (644.00 B)
+│   │   │   ├── 📦 Generated_74.asset (646.00 B)
+│   │   │   ├── 📦 Generated_75.asset (646.00 B)
+│   │   │   ├── 📦 Generated_76.asset (646.00 B)
+│   │   │   ├── 📦 Generated_77.asset (645.00 B)
+│   │   │   ├── 📦 Generated_78.asset (646.00 B)
+│   │   │   ├── 📦 Generated_79.asset (644.00 B)
+│   │   │   ├── 📦 Generated_8.asset (642.00 B)
+│   │   │   ├── 📦 Generated_80.asset (646.00 B)
+│   │   │   ├── 📦 Generated_81.asset (646.00 B)
+│   │   │   ├── 📦 Generated_82.asset (645.00 B)
+│   │   │   ├── 📦 Generated_83.asset (645.00 B)
+│   │   │   ├── 📦 Generated_84.asset (646.00 B)
+│   │   │   ├── 📦 Generated_85.asset (645.00 B)
+│   │   │   ├── 📦 Generated_86.asset (646.00 B)
+│   │   │   ├── 📦 Generated_87.asset (645.00 B)
+│   │   │   ├── 📦 Generated_88.asset (646.00 B)
+│   │   │   ├── 📦 Generated_89.asset (645.00 B)
+│   │   │   ├── 📦 Generated_9.asset (643.00 B)
+│   │   │   ├── 📦 Generated_90.asset (645.00 B)
+│   │   │   ├── 📦 Generated_91.asset (646.00 B)
+│   │   │   ├── 📦 Generated_92.asset (645.00 B)
+│   │   │   ├── 📦 Generated_93.asset (645.00 B)
+│   │   │   ├── 📦 Generated_94.asset (646.00 B)
+│   │   │   ├── 📦 Generated_95.asset (646.00 B)
+│   │   │   ├── 📦 Generated_96.asset (645.00 B)
+│   │   │   ├── 📦 Generated_97.asset (644.00 B)
+│   │   │   ├── 📦 Generated_98.asset (645.00 B)
+│   │   │   ├── 📦 Generated_99.asset (645.00 B)
 │   │   │   ├── 📦 ingot_tin.asset (797.00 B)
 │   │   │   ├── 📦 item_wood.asset (769.00 B)
 │   │   │   └── 📦 misc_salt.asset (806.00 B)
-│   │   ├── 📁 Recipes
+│   │   ├── 📁 Recipes [8 files]
+│   │   │   ├── 📦 recipe_berry_juice.asset (1.56 KB)
+│   │   │   ├── 📦 recipe_campfire.asset (1.55 KB)
+│   │   │   ├── 📦 recipe_cooked_meat.asset (1.38 KB)
+│   │   │   ├── 📦 recipe_crafting_bench.asset (1.58 KB)
+│   │   │   ├── 📦 recipe_planks.asset (1.37 KB)
+│   │   │   ├── 📦 recipe_rope.asset (1.35 KB)
+│   │   │   ├── 📦 recipe_stone_axe.asset (1.72 KB)
+│   │   │   └── 📦 recipe_stone_pickaxe.asset (1.74 KB)
 │   │   ├── 📁 StatusEffects
 │   │   ├── 📁 Weather
 │   │   └── 📁 Wildlife
@@ -259,7 +384,7 @@ Assets
 │   │   │   └── 🎬 _Persistent.unity (11.63 KB)
 │   │   ├── 📁 Development [2 files]
 │   │   │   ├── 🎬 Phase1_PlayerTest.unity (27.54 KB)
-│   │   │   └── 🎬 Phase2_InventoryTest.unity (27.54 KB)
+│   │   │   └── 🎬 Phase2_InventoryTest.unity (30.21 KB)
 │   │   └── 📁 World [2 files]
 │   │       ├── 🎬 MainGame.unity (15.61 KB)
 │   │       └── 🎬 World_Prototype.unity (11.64 KB)
@@ -278,5 +403,5 @@ Assets
 └── 📄 PlayerControls.cs (26.55 KB)
 
 ==================================================
-Total: 190 folders, 83 files
-Size: 1.31 MB
+Total: 196 folders, 202 files
+Size: 1.64 MB
