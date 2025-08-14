@@ -1,5 +1,5 @@
 // Assets/_WildSurvival/Code/Editor/Tools/WSUltimateGitHubWindow/WSUltimateGitHubWindow.cs
-// Wild Survival Git Hub Tool v2.0 - Enhanced with Diff Export & Safety Features
+// Wild Survival Git Hub Tool v2.1 - FIXED Collection Modified Error
 // Complete Git integration with diff capture for AI collaboration
 
 #if UNITY_EDITOR
@@ -17,12 +17,12 @@ using Debug = UnityEngine.Debug;
 public class WSUltimateGitHubWindow : EditorWindow
 {
     const string TOOL_NAME = "Wild Survival Git Hub";
-    const string VERSION = "2.0";
+    const string VERSION = "2.1"; // Updated version
     const string MENU_PATH = "Tools/Wild Survival/Git Hub";
     const int DEFAULT_TIMEOUT = 30000;
 
     [MenuItem(MENU_PATH, false, 100)]
-    [MenuItem("Wild Survival/Git & Share/Git Hub", false, 20)] // Also in your menu
+    [MenuItem("Wild Survival/Git & Share/Git Hub", false, 20)]
     public static void ShowWindow()
     {
         var window = GetWindow<WSUltimateGitHubWindow>();
@@ -46,6 +46,7 @@ public class WSUltimateGitHubWindow : EditorWindow
     bool _busy = false;
     bool _autoRefresh = true;
     bool _hasUncommittedChanges = false;
+    bool _needsRefresh = false; // Flag for deferred refresh
     Vector2 _scrollStatus;
     Vector2 _scrollLog;
     Vector2 _scrollDiff;
@@ -109,6 +110,13 @@ public class WSUltimateGitHubWindow : EditorWindow
 
     void OnGUI()
     {
+        // Handle deferred refresh at the start of OnGUI
+        if (_needsRefresh && Event.current.type == EventType.Layout)
+        {
+            _needsRefresh = false;
+            RefreshStatus();
+        }
+
         // Safety checks
         if (_log == null) _log = new StringBuilder(4096);
         if (_status == null) _status = new List<StatusEntry>();
@@ -255,7 +263,10 @@ public class WSUltimateGitHubWindow : EditorWindow
                 }
                 else
                 {
-                    foreach (var entry in _status)
+                    // CRITICAL FIX: Create a copy of the list to iterate
+                    var statusCopy = new List<StatusEntry>(_status);
+
+                    foreach (var entry in statusCopy)
                     {
                         DrawStatusEntry(entry);
                     }
@@ -281,12 +292,16 @@ public class WSUltimateGitHubWindow : EditorWindow
 
             GUILayout.FlexibleSpace();
 
-            // Actions
+            // Actions - use deferred refresh
             if (GUILayout.Button("Stage", GUILayout.Width(50)))
-                SafeExecute(() => StageFile(entry.Path));
+            {
+                StageFileDeferred(entry.Path);
+            }
 
             if (GUILayout.Button("Unstage", GUILayout.Width(60)))
-                SafeExecute(() => UnstageFile(entry.Path));
+            {
+                UnstageFileDeferred(entry.Path);
+            }
 
             if (GUILayout.Button("Discard", GUILayout.Width(60)))
             {
@@ -294,7 +309,7 @@ public class WSUltimateGitHubWindow : EditorWindow
                     $"Discard changes to {entry.Path}?",
                     "Discard", "Cancel"))
                 {
-                    SafeExecute(() => DiscardFile(entry.Path));
+                    DiscardFileDeferred(entry.Path);
                 }
             }
         }
@@ -548,6 +563,29 @@ public class WSUltimateGitHubWindow : EditorWindow
         }
     }
 
+    // ========== DEFERRED OPERATIONS (FIX) ==========
+
+    void StageFileDeferred(string path)
+    {
+        RunGit($"add \"{path}\"");
+        _needsRefresh = true;
+        Repaint();
+    }
+
+    void UnstageFileDeferred(string path)
+    {
+        RunGit($"reset HEAD \"{path}\"");
+        _needsRefresh = true;
+        Repaint();
+    }
+
+    void DiscardFileDeferred(string path)
+    {
+        RunGit($"checkout -- \"{path}\"");
+        _needsRefresh = true;
+        Repaint();
+    }
+
     // ========== CORE OPERATIONS ==========
 
     void DetectRepository()
@@ -613,6 +651,8 @@ public class WSUltimateGitHubWindow : EditorWindow
 
             _hasUncommittedChanges = _status.Count > 0;
         }
+
+        Repaint();
     }
 
     // ========== GIT COMMANDS ==========
@@ -706,8 +746,15 @@ public class WSUltimateGitHubWindow : EditorWindow
 
     void Push()
     {
-        RunGit($"push {_defaultPushRemote} {_branch}");
-        AppendLog($"Pushed to {_defaultPushRemote}");
+        AppendLog($"Pushing to {_defaultPushRemote}...");
+        if (RunGit($"push {_defaultPushRemote} {_branch}"))
+        {
+            AppendLog($"✅ Pushed to {_defaultPushRemote}");
+        }
+        else
+        {
+            AppendLog($"❌ Push failed. Try manual push in Git Bash.");
+        }
     }
 
     void Pull()
@@ -1046,7 +1093,7 @@ Thumbs.db";
 
                 if (process.ExitCode != 0)
                 {
-                    if (!string.IsNullOrEmpty(error))
+                    if (!string.IsNullOrEmpty(error) && !error.Contains("No such remote"))
                         AppendLog($"Git error: {error}");
                     return false;
                 }
