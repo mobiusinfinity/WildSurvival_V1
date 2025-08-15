@@ -1,6 +1,138 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
+/// <summary>
+/// Preset configuration for different fire types
+/// </summary>
+[System.Serializable]
+public class FirePreset
+{
+    public string presetName = "Campfire";
+    public FireInstance.FireType type; //= FireInstance.FireType.Campfire;
+
+    [Header("Temperature Settings")]
+    public float minTemperature = 100f;
+    public float maxTemperature = 600f;
+    public float optimalTemperature = 400f;
+    public float ignitionTemperature = 200f;
+
+    [Header("Fuel Settings")]
+    public float maxFuelCapacity = 100f;
+    public float fuelBurnRate = 1f;
+    public FireInstance.FuelType[] acceptedFuelTypes;
+
+    [Header("Visual Settings")]
+    public float lightIntensity = 2f;
+    public float lightRange = 10f;
+    public Color lightColor = new Color(1f, 0.5f, 0.2f);
+    public float smokeEmissionRate = 5f;
+
+    [Header("Gameplay Settings")]
+    public float cookingEfficiency = 1f;
+    public float warmthRadius = 5f;
+    public float spreadChance = 0.1f;
+    public bool canSpread = false;
+    public bool requiresIgnitionSource = true;
+
+    [Header("Audio")]
+    public AudioClip[] igniteSounds;
+    public AudioClip[] burningSounds;
+    public AudioClip[] extinguishSounds;
+
+    [Header("Particles")]
+    public GameObject flamePrefab;
+    public GameObject smokePrefab;
+    public GameObject embersPrefab;
+
+    public FirePreset()
+    {
+        acceptedFuelTypes = new FireInstance.FuelType[]
+        {
+            FireInstance.FuelType.Tinder,
+            FireInstance.FuelType.Kindling,
+            FireInstance.FuelType.Softwood,
+            FireInstance.FuelType.Hardwood
+        };
+    }
+
+    /// <summary>
+    /// Create a campfire preset
+    /// </summary>
+    public static FirePreset CreateCampfirePreset()
+    {
+        return new FirePreset
+        {
+            presetName = "Campfire",
+            type = FireInstance.FireType.Campfire,
+            maxTemperature = 600f,
+            maxFuelCapacity = 100f,
+            cookingEfficiency = 1f,
+            warmthRadius = 5f
+        };
+    }
+
+    /// <summary>
+    /// Create a torch preset
+    /// </summary>
+    public static FirePreset CreateTorchPreset()
+    {
+        return new FirePreset
+        {
+            presetName = "Torch",
+            type = FireInstance.FireType.Torch,
+            maxTemperature = 400f,
+            maxFuelCapacity = 30f,
+            cookingEfficiency = 0.2f,
+            warmthRadius = 2f,
+            lightIntensity = 1.5f,
+            lightRange = 8f
+        };
+    }
+
+    /// <summary>
+    /// Create a forge preset
+    /// </summary>
+    public static FirePreset CreateForgePreset()
+    {
+        return new FirePreset
+        {
+            presetName = "Forge",
+            type = FireInstance.FireType.Forge,
+            maxTemperature = 1200f,
+            maxFuelCapacity = 200f,
+            cookingEfficiency = 0f,
+            warmthRadius = 3f,
+            acceptedFuelTypes = new FireInstance.FuelType[]
+            {
+                FireInstance.FuelType.Coal,
+                FireInstance.FuelType.Charcoal,
+                FireInstance.FuelType.Hardwood
+            }
+        };
+    }
+
+    /// <summary>
+    /// Create a signal fire preset
+    /// </summary>
+    public static FirePreset CreateSignalFirePreset()
+    {
+        return new FirePreset
+        {
+            presetName = "Signal Fire",
+            type = FireInstance.FireType.SignalFire,
+            maxTemperature = 800f,
+            maxFuelCapacity = 150f,
+            cookingEfficiency = 0.5f,
+            warmthRadius = 8f,
+            smokeEmissionRate = 20f,
+            lightIntensity = 4f,
+            lightRange = 20f
+        };
+    }
+}
+
+
 
 
 /// <summary>
@@ -9,6 +141,10 @@ using System.Collections.Generic;
 [CreateAssetMenu(fileName = "FireSystemConfig", menuName = "WildSurvival/Fire/Fire System Config")]
 public class FireSystemConfiguration : ScriptableObject
 {
+
+    [Header("Fire Presets")]
+    public List<FirePreset> firePresets = new List<FirePreset>();
+
     [Header("Global Fire Settings")]
     public float globalWindStrength = 5f;
     public float globalRainIntensity = 0f;
@@ -17,6 +153,8 @@ public class FireSystemConfiguration : ScriptableObject
 
     [Header("Fuel Properties")]
     public List<FuelTypeProperties> fuelProperties = new();
+
+    private FireInstance.FireType fireTypeToCreate = FireInstance.FireType.Campfire;
 
     [Header("Fire Types")]
     public List<FireTypeConfiguration> fireTypes = new();
@@ -51,7 +189,7 @@ public class FireSystemConfiguration : ScriptableObject
     [System.Serializable]
     public class FireTypeConfiguration
     {
-        public FireInstance.FireType type;
+        public FireInstance.FireType type;//fireType = FireInstance.FireType.Campfire;
         public string displayName;
         public float maxTemperature = 800f;
         public float maxFuelCapacity = 100f;
@@ -64,42 +202,32 @@ public class FireSystemConfiguration : ScriptableObject
         public bool canSpread = false;
         public GameObject prefab;
     }
-}
 
-/// <summary>
-/// Fire prefab factory for creating different fire types
-/// </summary>
-public class FirePrefabFactory : MonoBehaviour
-{
-    [SerializeField] private FireSystemConfiguration config;
-
-    public GameObject CreateFire(FireInstance.FireType type, Vector3 position)
+    public FirePreset GetPreset(FireInstance.FireType fireType)
     {
-        var fireConfig = config.fireTypes.Find(f => f.type == type);
-        if (fireConfig == null || fireConfig.prefab == null)
+        foreach (var preset in firePresets)
         {
-            Debug.LogError($"No prefab configured for fire type: {type}");
-            return null;
+            if (preset.type == fireType)
+                return preset;
         }
 
-        var fireObject = Instantiate(fireConfig.prefab, position, Quaternion.identity);
-        var fireInstance = fireObject.GetComponent<FireInstance>();
-
-        if (fireInstance == null)
-        {
-            fireInstance = fireObject.AddComponent<FireInstance>();
-        }
-
-        // Configure fire instance
-        ConfigureFireInstance(fireInstance, fireConfig);
-
-        return fireObject;
+        // Return default campfire preset if not found
+        return FirePreset.CreateCampfirePreset();
     }
 
-    private void ConfigureFireInstance(FireInstance fire, FireSystemConfiguration.FireTypeConfiguration config)
+    private void OnEnable()
     {
-        // Set properties from config
-        // This would require making FireInstance properties public or adding setter methods
+        // Initialize with default presets if empty
+        if (firePresets == null || firePresets.Count == 0)
+        {
+            firePresets = new List<FirePreset>
+            {
+                FirePreset.CreateCampfirePreset(),
+                FirePreset.CreateTorchPreset(),
+                FirePreset.CreateForgePreset(),
+                FirePreset.CreateSignalFirePreset()
+            };
+        }
     }
 }
 
@@ -111,7 +239,7 @@ public class FireSystemSetupWizard : EditorWindow
 {
     private FireSystemConfiguration config;
     private GameObject selectedPrefab;
-    private FireInstance.FireType fireTypeToCreate = FireInstance.FireType.Campfire;
+    private FireInstance.FireType fireTypeToCreate;
 
     [MenuItem("Tools/Wild Survival/Fire System Setup")]
     public static void ShowWindow()
@@ -430,71 +558,74 @@ public class FireSystemSetupWizard : EditorWindow
 
     private void CreateTestFire()
     {
-        var factory = FindObjectOfType<FirePrefabFactory>();
-        if (factory == null)
-        {
-            var factoryObj = new GameObject("Fire Factory");
-            factory = factoryObj.AddComponent<FirePrefabFactory>();
-        }
-
-        // Create at scene view camera position
-        var sceneView = SceneView.lastActiveSceneView;
-        Vector3 position = sceneView != null ?
-            sceneView.camera.transform.position + sceneView.camera.transform.forward * 5f :
-            Vector3.zero;
-
-        position.y = 0; // Place on ground
-
-        var fire = factory.CreateFire(fireTypeToCreate, position);
-
-        if (fire != null)
-        {
-            Selection.activeGameObject = fire;
-            EditorGUIUtility.PingObject(fire);
-        }
-    }
-
-    private void ValidateSetup()
+        // TEMPORARY: Comment out until FirePrefabFactory is recognized
+        /*
+    var factory = FindObjectOfType<FirePrefabFactory>();
+    if (factory == null)
     {
-        var issues = new List<string>();
-
-        // Check configuration
-        if (config == null)
-        {
-            issues.Add("No configuration assigned");
-            return;
-        }
-
-        // Check prefabs
-        foreach (var fireType in config.fireTypes)
-        {
-            if (fireType.prefab == null)
-                issues.Add($"No prefab for fire type: {fireType.displayName}");
-        }
-
-        // Check particles
-        if (config.fireParticlesPrefab == null)
-            issues.Add("Fire particles prefab missing");
-        if (config.smokeParticlesPrefab == null)
-            issues.Add("Smoke particles prefab missing");
-
-        // Check database
-        var itemDB = AssetDatabase.LoadAssetAtPath<ItemDatabase>(
-            "Assets/_Project/Data/ItemDatabase.asset");
-        if (itemDB == null)
-            issues.Add("Item Database not found");
-
-        // Display results
-        if (issues.Count == 0)
-        {
-            EditorUtility.DisplayDialog("Validation Passed",
-                "Fire system is properly configured!", "OK");
-        }
-        else
-        {
-            EditorUtility.DisplayDialog("Validation Failed",
-                "Issues found:\n" + string.Join("\n", issues), "OK");
-        }
+        var factoryObj = new GameObject("Fire Factory");
+        factory = factoryObj.AddComponent<FirePrefabFactory>();
     }
+
+    // Create at scene view camera position
+    var sceneView = SceneView.lastActiveSceneView;
+    Vector3 position = sceneView != null ?
+        sceneView.camera.transform.position + sceneView.camera.transform.forward * 5f :
+        Vector3.zero;
+
+    position.y = 0; // Place on ground
+
+    var fire = factory.CreateFire(fireTypeToCreate, position);
+
+    if (fire != null)
+    {
+        Selection.activeGameObject = fire;
+        EditorGUIUtility.PingObject(fire);
+    }
+        */
+}
+
+private void ValidateSetup()
+{
+    var issues = new List<string>();
+
+    // Check configuration
+    if (config == null)
+    {
+        issues.Add("No configuration assigned");
+        return;
+    }
+
+    // Check prefabs
+    foreach (var fireType in config.fireTypes)
+    {
+        if (fireType.prefab == null)
+            issues.Add($"No prefab for fire type: {fireType.displayName}");
+    }
+
+    // Check particles
+    if (config.fireParticlesPrefab == null)
+        issues.Add("Fire particles prefab missing");
+    if (config.smokeParticlesPrefab == null)
+        issues.Add("Smoke particles prefab missing");
+
+    // Check database
+    var itemDB = AssetDatabase.LoadAssetAtPath<ItemDatabase>(
+        "Assets/_Project/Data/ItemDatabase.asset");
+    if (itemDB == null)
+        issues.Add("Item Database not found");
+
+    // Display results
+    if (issues.Count == 0)
+    {
+        EditorUtility.DisplayDialog("Validation Passed",
+            "Fire system is properly configured!", "OK");
+    }
+    else
+    {
+        EditorUtility.DisplayDialog("Validation Failed",
+            "Issues found:\n" + string.Join("\n", issues), "OK");
+    }
+}
 }
 #endif

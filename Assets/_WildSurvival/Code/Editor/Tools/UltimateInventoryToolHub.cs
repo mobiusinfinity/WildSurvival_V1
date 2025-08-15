@@ -883,7 +883,6 @@ public class UltimateInventoryToolHub : EditorWindow
         EditorGUILayout.BeginVertical(cardStyle);
 
         EditorGUILayout.LabelField("📊 Live Statistics", EditorStyles.boldLabel);
-        //DrawSectionHeading("📊", "Live Statistics");
 
         // Animated progress bars
         DrawAnimatedProgressBar("Items", totalItems, 1000, new Color(0.3f, 0.8f, 0.3f));
@@ -929,19 +928,6 @@ public class UltimateInventoryToolHub : EditorWindow
             }
         }
 
-        //Rect fillRect = new Rect(rect.x, rect.y, rect.width * animatedProgress, rect.height);
-
-        //// Gradient fill
-        //EditorGUI.DrawRect(fillRect, color);
-
-        //// Shine effect
-        //if (animationsEnabled)
-        //{
-        //    float shine = Mathf.PingPong(Time.realtimeSinceStartup * 2f, 1f);
-        //    Rect shineRect = new Rect(rect.x + (rect.width * animatedProgress * shine), rect.y, 2, rect.height);
-        //    EditorGUI.DrawRect(shineRect, new Color(1, 1, 1, 0.5f));
-        //}
-
         // Text overlay
         GUI.Label(rect, $"{current}/{max}", EditorStyles.centeredGreyMiniLabel);
 
@@ -953,19 +939,9 @@ public class UltimateInventoryToolHub : EditorWindow
         EditorGUILayout.BeginVertical(cardStyle);
 
         EditorGUILayout.LabelField("📜 Activity Feed", EditorStyles.boldLabel);
-        //DrawSectionHeading("📜", "Activity Feed");
 
         // Limit to 5 most recent activities
         int maxActivities = Mathf.Min(recentActivity.Count, 5);
-
-        //for (int i = 0; i < Mathf.Min(recentActivity.Count, 5); i++)
-        //{
-        //    // Fade in animation for new entries
-        //    float alpha = (i == 0 && tabTransition > 0) ? tabTransition : 1f;
-        //    GUI.color = new Color(1, 1, 1, alpha);
-
-        //    EditorGUILayout.LabelField($"• {recentActivity[i]}", EditorStyles.miniLabel);
-        //}
         for (int i = 0; i < maxActivities; i++)
         {
             // Fade in animation for new entries
@@ -1205,15 +1181,6 @@ private void DrawInventoryToolbar()
         //EditorGUILayout.BeginHorizontal(GUI.skin.box);
         EditorGUILayout.BeginHorizontal(GUI.skin.box, GUILayout.MaxWidth(300));
 
-        // Icon
-        //if (item.icon != null)
-        //{
-        //    GUI.DrawTexture(GUILayoutUtility.GetRect(32, 32), item.icon.texture, ScaleMode.ScaleToFit);
-        //}
-        //else
-        //{
-        //    EditorGUILayout.LabelField("📦", GUILayout.Width(32));
-        //}
         if (item.icon != null)
         {
             GUI.DrawTexture(GUILayoutUtility.GetRect(32, 32, GUILayout.Width(32), GUILayout.Height(32)),
@@ -5288,134 +5255,6 @@ Stack sizes: 1 for tools/weapons, 5-99 for resources/consumables";
             }
         }
     }
-
-    // ========== DATABASE CLASSES ==========
-
-    //[System.Serializable]/
-    //public class ItemDatabase : ScriptableObject
-    //{
-    //[SerializeField] private List<ItemDefinition> items = new List<ItemDefinition>();
-
-    //public List<ItemDefinition> GetAllItems() => items;
-
-    //public void AddItem(ItemDefinition item)
-    //{
-    //    if (item != null && !items.Contains(item))
-    //    {
-    //        items.Add(item);
-    //        EditorUtility.SetDirty(this);
-    //    }
-    //}
-
-    //public void RemoveItem(ItemDefinition item)
-    //{
-    //    if (items.Remove(item))
-    //    {
-    //        EditorUtility.SetDirty(this);
-    //    }
-    //}
-
-    //public List<ItemDefinition> GetItemsByCategory(ItemCategory category)
-    //{
-    //    return items.Where(i => i != null && i.primaryCategory == category).ToList();
-    //}
-
-    //public ItemDefinition GetItem(string itemID)
-    //{
-    //    return items.FirstOrDefault(i => i != null && i.itemID == itemID);
-    //}
-//}
-
-//[System.Serializable]
-//public class RecipeDatabase : ScriptableObject
-//{
-    //[SerializeField] private List<RecipeDefinition> recipes = new List<RecipeDefinition>();
-
-    //public List<RecipeDefinition> GetAllRecipes() => recipes;
-
-    //public void AddRecipe(RecipeDefinition recipe)
-    //{
-    //    if (recipe != null && !recipes.Contains(recipe))
-    //    {
-    //        recipes.Add(recipe);
-    //        EditorUtility.SetDirty(this);
-    //    }
-    //}
-
-    //public void RemoveRecipe(RecipeDefinition recipe)
-    //{
-    //    if (recipes.Remove(recipe))
-    //    {
-    //        EditorUtility.SetDirty(this);
-    //    }
-    //}
-
-    //// Add method to clear old recipes
-    //public void ClearAllRecipes()
-    //{
-    //    recipes.Clear();
-    //    EditorUtility.SetDirty(this);
-    //}
-//}
-
-//    [System.Serializable]
-//    public class ItemDefinition : ScriptableObject
-//    {
-        //public string itemID;
-        //public string displayName;
-        //public string description;
-        //public Sprite icon;
-        //public GameObject worldModel;
-        //public ItemCategory primaryCategory;
-        //public float weight = 1f;
-        //public int maxStackSize = 1;
-        //public Vector2Int gridSize = Vector2Int.one;
-        //public bool allowRotation = true;
-        //public int baseValue = 10;
-
-        //// ADD THESE MISSING PROPERTIES:
-        //public bool hasDurability = false;
-        //public float maxDurability = 100f;
-        //public bool useCustomShape = false;
-        //public bool[,] shapeGrid;
-    //}
-
-    //[System.Serializable]
-    //public class RecipeDefinition : ScriptableObject
-    //{
-        //public string recipeID;
-        //public string recipeName;
-        //public string description;
-
-        //// CHANGE THIS: Store as string for compatibility
-        //public string category;  // Changed from RecipeCategory to string
-
-        //public WorkstationType requiredWorkstation;
-        //public float baseCraftTime = 5f;
-        //public int tier = 1;
-        //public bool isKnownByDefault = true;
-        //public RecipeIngredient[] ingredients;
-        //public RecipeOutput[] outputs;
-    //}
-
-    //[System.Serializable]
-    //public class RecipeIngredient
-    //{
-    //    public string name;
-    //    public ItemDefinition specificItem;  // ADD THIS LINE
-    //    public int quantity;
-    //    public bool consumed = true;
-    //}
-
-    //[System.Serializable]
-    //public class RecipeOutput
-    //{
-    //    public ItemDefinition item;
-    //    public int quantityMin = 1;
-    //    public int quantityMax = 1;
-    //    public float chance = 1f;
-    //}
-
     // ========== DATABASE OPERATIONS ==========
 
     // Also need to add this list for the import log
@@ -5798,18 +5637,4 @@ Stack sizes: 1 for tools/weapons, 5-99 for resources/consumables";
         Advanced
     }
 
-    //public enum ItemCategory
-    //{
-    //    Misc, Resource, Tool, Weapon, Food, Medicine, Clothing, Building
-    //}
-
-    //public enum RecipeCategory
-    //{
-    //    Basic, Tools, Weapons, Clothing, Building, Cooking, Medicine, Processing, Advanced
-    //}
-
-    //public enum WorkstationType
-    //{
-    //    None, CraftingBench, Forge, Campfire, Anvil, CookingPot, Loom, TanningRack, ChemistryLab, AdvancedBench
-    //}
 }

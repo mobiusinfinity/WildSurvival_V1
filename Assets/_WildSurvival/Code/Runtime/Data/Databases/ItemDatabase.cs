@@ -15,6 +15,24 @@ public class ItemDatabase : ScriptableObject
     [Header("Legacy Items (ItemData)")]
     [SerializeField] private List<ItemData> legacyItems = new List<ItemData>();
 
+    // ADD this singleton instance
+    private static ItemDatabase instance;
+    public static ItemDatabase Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = Resources.Load<ItemDatabase>("ItemDatabase");
+                if (instance == null)
+                {
+                    instance = FindObjectOfType<ItemDatabase>();
+                }
+            }
+            return instance;
+        }
+    }
+
     [Header("New Items (ItemDefinition)")]
     [SerializeField] private List<ItemDefinition> items = new List<ItemDefinition>();
 

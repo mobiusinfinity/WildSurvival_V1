@@ -456,7 +456,7 @@ public class CraftingManager : MonoBehaviour
     {
         if (notifications != null)
         {
-            notifications.ShowNotification(message, NotificationType.Info);
+            notifications.ShowNotification(message, NotificationSystem.NotificationType.Info);
         }
         else
         {

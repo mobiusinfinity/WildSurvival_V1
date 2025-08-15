@@ -654,10 +654,10 @@ public class UltimateBatchProcessor : EditorWindow
             {
                 ingredients.Add(new RecipeIngredient
                 {
-                    name = ing.name,
+                    specificItem = GetItemDefinition("some_item_id"),
                     quantity = ing.quantity,
-                    consumed = ing.consumed,
-                    category = ItemCategory.Misc
+                    //consumed = ing.consumed,
+                    //category = ItemCategory.Misc
                 });
             }
             recipe.ingredients = ingredients.ToArray();
@@ -695,6 +695,25 @@ public class UltimateBatchProcessor : EditorWindow
             importLog.Add($"✗ Failed recipe {data.recipeID}: {e.Message}");
             return false;
         }
+    }
+
+    private ItemDefinition GetItemDefinition(string itemID)
+    {
+        // Try to load from Resources
+        ItemDefinition item = Resources.Load<ItemDefinition>($"Items/{itemID}");
+
+        // Try from database
+        if (item == null)
+        {
+            string[] guids = AssetDatabase.FindAssets($"t:ItemDefinition {itemID}");
+            if (guids.Length > 0)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                item = AssetDatabase.LoadAssetAtPath<ItemDefinition>(path);
+            }
+        }
+
+        return item;
     }
 
     // ========== EXPORT FUNCTIONS ==========

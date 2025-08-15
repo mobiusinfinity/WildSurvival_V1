@@ -1,6 +1,7 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using System;
 
 /// <summary>
 /// Manages all player stats including health, stamina, hunger, and thirst
@@ -94,6 +95,101 @@ public class PlayerStats : MonoBehaviour
     public UnityEvent OnStarving;
     public UnityEvent OnDehydrated;
 
+
+    [Header("Warmth Sources")]
+    private List<WarmthSource> activeWarmthSources = new List<WarmthSource>();
+    private float ambientTemperature = 15f; // Base world temperature
+
+    [Header("Temperature Settings")]
+    [SerializeField] private float baseBodyTemperature = 37f;
+    [SerializeField] private float currentBodyTemperature = 37f;
+    //[SerializeField] private float ambientTemperature = 15f;
+    //[SerializeField] private float minSafeTemp = 35f;
+    //[SerializeField] private float maxSafeTemp = 39f;
+    [SerializeField] private float criticalLowTemp = 32f;
+    [SerializeField] private float criticalHighTemp = 41f;
+
+    [Header("Temperature Change Rates")]
+    [SerializeField] private float normalChangeRate = 0.5f; // °C per second
+    [SerializeField] private float rapidChangeRate = 1.5f; // When near fire or in water
+    [SerializeField] private float clothingInsulation = 0.3f; // 0-1, reduces heat loss
+
+    [Header("Temperature Effects")]
+    [SerializeField] private float coldDamageRate = 2f; // HP per second when cold
+    [SerializeField] private float heatDamageRate = 1f; // HP per second when hot
+    [SerializeField] private float coldStaminaDrain = 3f; // Extra stamina drain when cold
+    [SerializeField] private float shiveringThreshold = 34f;
+    [SerializeField] private float sweatingThreshold = 38f;
+
+    [Header("Fire Detection")]
+    [SerializeField] private float fireDetectionRadius = 20f;
+    [SerializeField] private LayerMask fireLayerMask = -1;
+    //[SerializeField] private float updateInterval = 0.5f;
+
+    [Header("Status Effects")]
+    [SerializeField] private bool isShivering;
+    [SerializeField] private bool isSweating;
+    [SerializeField] private bool hasHypothermia;
+    [SerializeField] private bool hasHeatStroke;
+    [SerializeField] private bool isNearFire;
+
+    // Components
+    private PlayerStats playerStats;
+    private Dictionary<FireInstance, float> nearbyFires = new Dictionary<FireInstance, float>();
+    private float nextUpdateTime;
+    private float effectiveInsulation;
+
+    // Properties
+    public float BodyTemperature => currentBodyTemperature;
+    public float AmbientTemperature => ambientTemperature;
+    public bool IsWarm => currentBodyTemperature >= minSafeTemp && currentBodyTemperature <= maxSafeTemp;
+    public bool IsCold => currentBodyTemperature < minSafeTemp;
+    public bool IsHot => currentBodyTemperature > maxSafeTemp;
+    public bool IsShivering => isShivering;
+    public bool IsSweating => isSweating;
+    public bool HasHypothermia => hasHypothermia;
+    public bool HasHeatStroke => hasHeatStroke;
+    public bool IsNearFire => isNearFire;
+
+    // Events
+    public UnityEvent<float> OnTemperatureChanged = new UnityEvent<float>();
+    public UnityEvent OnHypothermiaStart = new UnityEvent();
+    public UnityEvent OnHypothermiaEnd = new UnityEvent();
+    public UnityEvent OnHeatStrokeStart = new UnityEvent();
+    public UnityEvent OnHeatStrokeEnd = new UnityEvent();
+    public UnityEvent OnStartShivering = new UnityEvent();
+    public UnityEvent OnStopShivering = new UnityEvent();
+    public UnityEvent OnStartSweating = new UnityEvent();
+    public UnityEvent OnStopSweating = new UnityEvent();
+    public UnityEvent<FireInstance> OnNearFireStart = new UnityEvent<FireInstance>();
+    public UnityEvent OnNearFireEnd = new UnityEvent();
+
+    [System.Serializable]
+    public class WarmthSource
+    {
+        public GameObject source;
+        public float warmthAmount;
+        public float maxDistance;
+    }
+
+    public void AddWarmthSource(GameObject source, float warmth, float range)
+    {
+        // Remove existing if already present
+        RemoveWarmthSource(source);
+
+        activeWarmthSources.Add(new WarmthSource
+        {
+            source = source,
+            warmthAmount = warmth,
+            maxDistance = range
+        });
+    }
+
+    public void RemoveWarmthSource(GameObject source)
+    {
+        activeWarmthSources.RemoveAll(w => w.source == source);
+    }
+
     // Static events for other systems
     public static event Action<float> OnHealthChangedStatic;
     public static event Action<float> OnStaminaChangedStatic;
@@ -118,7 +214,7 @@ public class PlayerStats : MonoBehaviour
     public float CurrentHunger => hunger.currentValue;
     public float CurrentThirst => thirst.currentValue;
     public bool IsAlive => health.currentValue > 0;
-    public float BodyTemperature => bodyTemperature;
+    //public float BodyTemperature => bodyTemperature;
     #endregion
 
     #region Unity Lifecycle
@@ -136,9 +232,14 @@ public class PlayerStats : MonoBehaviour
         {
             updateTimer = 0f;
             UpdateStats();
+            //DetectNearbyFires();
+            //UpdateAmbientTemperature();
         }
 
         UpdateRegen();
+        UpdateBodyTemperature();
+        //UpdateTemperatureEffects();
+        //ApplyTemperatureDamage();
     }
     #endregion
 
@@ -172,6 +273,49 @@ public class PlayerStats : MonoBehaviour
             {
                 ModifyStamina(-5f * updateInterval);
             }
+
+            
+        }
+    }
+
+    private void UpdateBodyTemperature()
+    {
+        float targetTemp = ambientTemperature;
+
+        // Add warmth from all sources
+        foreach (var warmthSource in activeWarmthSources)
+        {
+            if (warmthSource.source != null)
+            {
+                float distance = Vector3.Distance(transform.position, warmthSource.source.transform.position);
+                if (distance <= warmthSource.maxDistance)
+                {
+                    // Linear falloff
+                    float warmth = warmthSource.warmthAmount * (1f - distance / warmthSource.maxDistance);
+                    targetTemp += warmth;
+                }
+            }
+        }
+
+        // Gradually move body temperature toward target
+        float tempChangeRate = 0.5f * Time.deltaTime;
+        bodyTemperature = Mathf.MoveTowards(bodyTemperature,
+            Mathf.Clamp(targetTemp, 30f, 42f), tempChangeRate);
+
+        effectiveInsulation = clothingInsulation;
+
+        // Apply temperature effects
+        if (bodyTemperature < minSafeTemp)
+        {
+            // Cold damage
+            ModifyHealth(-2f * Time.deltaTime);
+            ModifyStamina(-5f * Time.deltaTime);
+        }
+        else if (bodyTemperature > maxSafeTemp)
+        {
+            // Heat damage
+            ModifyHealth(-1f * Time.deltaTime);
+            ModifyStamina(-3f * Time.deltaTime);
         }
     }
 

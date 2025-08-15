@@ -31,8 +31,10 @@ public class FireInteractionController : MonoBehaviour
 
     private FireInstance currentFire;
     private PlayerInventory playerInventory;
-    private PlayerVitals playerVitals;
+    private PlayerStats playerStats;
     private Camera playerCamera;
+
+    private InventoryManager inventory;
 
     // Cached data
     private List<ItemDefinition> availableFuels = new();
@@ -55,8 +57,8 @@ public class FireInteractionController : MonoBehaviour
         if (playerInventory == null)
             playerInventory = GetComponent<PlayerInventory>();
 
-        if (playerVitals == null)
-            playerVitals = GetComponent<PlayerVitals>();
+        if (playerStats == null)
+            playerStats = GetComponent<PlayerStats>();
 
         if (playerCamera == null)
             playerCamera = Camera.main;
@@ -67,6 +69,12 @@ public class FireInteractionController : MonoBehaviour
 
         if (cookingUI == null)
             cookingUI = FindObjectOfType<CookingUI>();
+    }
+
+    private void Start()
+    {
+        // Get inventory reference
+        inventory = InventoryManager.Instance;
     }
 
     private void Update()
@@ -112,7 +120,29 @@ public class FireInteractionController : MonoBehaviour
             }
         }
     }
+    // Add this helper method
+    private ItemDefinition GetItemDefinition(string itemID)
+    {
+        // Try to load from Resources
+        ItemDefinition item = Resources.Load<ItemDefinition>($"Items/{itemID}");
 
+        // Or try from database
+        if (item == null && ItemDatabase.Instance != null)
+        {
+            item = ItemDatabase.Instance.GetItem(itemID);
+        }
+
+        // Create temporary if not found
+        if (item == null)
+        {
+            Debug.LogWarning($"Item {itemID} not found, creating temporary");
+            item = ScriptableObject.CreateInstance<ItemDefinition>();
+            item.itemID = itemID;
+            item.displayName = itemID;
+        }
+
+        return item;
+    }
     private void CheckNearbyFires()
     {
         var nearbyFires = Physics.OverlapSphere(transform.position, interactionRange, fireLayer)
@@ -401,22 +431,15 @@ public class FireInteractionController : MonoBehaviour
     {
         var sources = new List<IgnitionSource>();
 
-        if (playerInventory == null) return sources;
+        if (inventory.HasItem(GetItemDefinition("tinder"), 3))
+        {
+            inventory.RemoveItem(GetItemDefinition("tinder"), 3);
+        }
 
-        if (playerInventory.HasItem("AI_matches"))
-            sources.Add(IgnitionSource.Matches);
-
-        if (playerInventory.HasItem("tool_lighter"))
-            sources.Add(IgnitionSource.Lighter);
-
-        if (playerInventory.HasItem("tool_flint_steel"))
-            sources.Add(IgnitionSource.FlintAndSteel);
-
-        if (playerInventory.HasItem("tool_bow_drill"))
-            sources.Add(IgnitionSource.BowDrill);
-
-        if (playerInventory.HasItem("AI_fire_starter"))
-            sources.Add(IgnitionSource.FireStarter);
+        if (inventory.HasItem(GetItemDefinition("kindling"), 2))
+        {
+            inventory.RemoveItem(GetItemDefinition("kindling"), 2);
+        }
 
         return sources;
     }
@@ -476,7 +499,7 @@ public class FireInteractionController : MonoBehaviour
 
     public void LightTorchFromFire(FireInstance fire)
     {
-        if (!playerInventory.HasItem("AI_torch"))
+        if (!playerInventory.HasItem(GetItemDefinition("torch")))
         {
             ShowMessage("No torch in inventory");
             return;
@@ -484,26 +507,7 @@ public class FireInteractionController : MonoBehaviour
 
         // Create lit torch
         var torch = CreateLitTorch();
-
-        if (fire.TryLightTorch(torch))
-        {
-            playerInventory.RemoveItem(GetItem("AI_torch"), 1);
-
-            // Add lit torch to inventory or equip it
-            var litTorchItem = GetItem("torch_lit");
-            if (litTorchItem == null)
-            {
-                // Create lit torch item if it doesn't exist
-                litTorchItem = CreateLitTorchItem();
-            }
-
-            playerInventory.AddItem(litTorchItem, 1);
-
-            // Auto-equip if hand is free
-            EquipTorch(torch);
-
-            ShowMessage("Torch lit!");
-        }
+        fire.TryLightTorch();
     }
 
     private GameObject CreateLitTorch()

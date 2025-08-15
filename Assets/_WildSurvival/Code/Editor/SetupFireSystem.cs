@@ -17,7 +17,7 @@ public class FireSystemSetup : Editor
         UpdateFuelItems();
 
         // Create fire prefabs
-        CreateFirePrefabs(config);
+        CreateFirePrefabs();
 
         Debug.Log("Fire System Setup Complete!");
     }
@@ -45,5 +45,15 @@ public class FireSystemSetup : Editor
         AssetDatabase.SaveAssets();
 
         return config;
+    }
+
+    private static void UpdateFuelItems()
+    {
+        Debug.Log("UpdateFuelItems - Not implemented");
+    }
+
+    private static void CreateFirePrefabs()
+    {
+        Debug.Log("CreateFirePrefabs - Not implemented");
     }
 }

@@ -253,7 +253,7 @@ public class WorkbenchSystem : MonoBehaviour, IInteractable
         // Fire event
         OnWorkbenchOpened?.Invoke(this);
 
-        ShowNotification($"Opened {displayName}", NotificationType.Info);
+        ShowNotification($"Opened {displayName}", NotificationSystem.NotificationType.Info);
     }
 
     public void CloseWorkbench()
@@ -295,7 +295,7 @@ public class WorkbenchSystem : MonoBehaviour, IInteractable
         // Check fuel
         if (requiresFuel && currentFuel < fuelPerCraft)
         {
-            ShowNotification("Not enough fuel!", NotificationType.Error);
+            ShowNotification("Not enough fuel!", NotificationSystem.NotificationType.Error);
             return false;
         }
 
@@ -323,7 +323,7 @@ public class WorkbenchSystem : MonoBehaviour, IInteractable
                 UpdateFuelDisplay();
                 OnFuelChanged?.Invoke(currentFuel);
 
-                ShowNotification($"Added {toAdd} fuel", NotificationType.Success);
+                ShowNotification($"Added {toAdd} fuel", NotificationSystem.NotificationType.Success);
             }
         }
     }
@@ -339,7 +339,7 @@ public class WorkbenchSystem : MonoBehaviour, IInteractable
         if (currentFuel <= 0 && craftingManager != null && craftingManager.IsCrafting)
         {
             craftingManager.CancelCrafting();
-            ShowNotification("Out of fuel! Crafting cancelled.", NotificationType.Error);
+            ShowNotification("Out of fuel! Crafting cancelled.", NotificationSystem.NotificationType.Error);
         }
 
         OnFuelChanged?.Invoke(currentFuel);
@@ -352,7 +352,7 @@ public class WorkbenchSystem : MonoBehaviour, IInteractable
         // Check requirements
         if (!HasUpgradeRequirements())
         {
-            ShowNotification("Missing upgrade materials!", NotificationType.Error);
+            ShowNotification("Missing upgrade materials!", NotificationSystem.NotificationType.Error);
             return;
         }
 
@@ -378,7 +378,7 @@ public class WorkbenchSystem : MonoBehaviour, IInteractable
         // Fire event
         OnWorkbenchUpgraded?.Invoke(newWorkbench);
 
-        ShowNotification($"Upgraded to {newWorkbench.displayName}!", NotificationType.Success);
+        ShowNotification($"Upgraded to {newWorkbench.displayName}!", NotificationSystem.NotificationType.Success);
 
         // Destroy old workbench
         Destroy(gameObject, 0.5f);
@@ -631,7 +631,7 @@ public class WorkbenchSystem : MonoBehaviour, IInteractable
         }
     }
 
-    private void ShowNotification(string message, NotificationType type)
+    private void ShowNotification(string message, NotificationSystem.NotificationType type)
     {
         if (notifications != null)
         {

@@ -242,14 +242,14 @@ public class HungerSystem : MonoBehaviour, ITickable
     {
         if (_stomachContents + food.Volume > _config.MaxStomachCapacity)
         {
-            ShowNotification("Too full to eat!", NotificationType.Warning);
+            ShowNotification("Too full to eat!", NotificationSystem.NotificationType.Warning);
             OnStomachFull?.Invoke();
             return false;
         }
 
         if (food.Type == FoodItem.FoodType.Spoiled)
         {
-            ShowNotification("Food is spoiled!", NotificationType.Warning);
+            ShowNotification("Food is spoiled!", NotificationSystem.NotificationType.Warning);
         }
 
         _digestionQueue.Enqueue(new DigestingFood
@@ -280,7 +280,7 @@ public class HungerSystem : MonoBehaviour, ITickable
         string message = food.Type == FoodItem.FoodType.Cooked
             ? $"Enjoyed {food.Name} (+{food.Calories} cal)"
             : $"Ate {food.Name} (+{food.Calories} cal)";
-        ShowNotification(message, NotificationType.Info);
+        ShowNotification(message, NotificationSystem.NotificationType.Info);
 
         return true;
     }
@@ -310,7 +310,7 @@ public class HungerSystem : MonoBehaviour, ITickable
             if (_isStarving && !wasStarving)
             {
                 OnStarvationStarted?.Invoke();
-                ShowNotification("You are starving!", NotificationType.Critical);
+                ShowNotification("You are starving!", NotificationSystem.NotificationType.Critical);
             }
             else if (!_isStarving && wasStarving)
             {
@@ -342,21 +342,21 @@ public class HungerSystem : MonoBehaviour, ITickable
             };
             ShowNotification(
                 messages[UnityEngine.Random.Range(0, messages.Length)],
-                NotificationType.Warning
+                NotificationSystem.NotificationType.Warning
             );
         }
     }
 
-    private void ShowNotification(string message, NotificationType type)
+    private void ShowNotification(string message, NotificationSystem.NotificationType fireType)
     {
         if (_notifications != null)
         {
-            _notifications.ShowNotification(message, type);
+            _notifications.ShowNotification(message, fireType);
         }
         else
         {
             // Fallback to console if no notification system
-            Debug.Log($"[Hunger] {type}: {message}");
+            Debug.Log($"[Hunger] {fireType}: {message}");
         }
     }
 

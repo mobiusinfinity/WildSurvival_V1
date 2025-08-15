@@ -3,26 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum NotificationType
-{
-    Info,
-    Warning,
-    Critical,
-    Success,
-    Item,
-    Achievement,
-    Error,      
-    Quest,
-    Combat,
-    Loot
-}
-
 /// <summary>
 /// Handles all in-game notifications and UI feedback
 /// Place this file at: Assets/_WildSurvival/Code/Runtime/UI/Core/NotificationSystem.cs
 /// </summary>
 public class NotificationSystem : MonoBehaviour
 {
+    public enum NotificationType
+    {
+        Info,
+        Warning,
+        Critical,
+        Success,
+        Item,
+        Achievement,
+        Error,
+        Quest,
+        Combat,
+        Fire,    // Add this for fire notifications
+        Loot,
+        Crafting, // Add this too
+    }
+
     [System.Serializable]
     public class NotificationStyle
     {

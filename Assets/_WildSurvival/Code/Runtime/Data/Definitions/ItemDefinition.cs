@@ -10,6 +10,17 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewItem", menuName = "Wild Survival/Item")]
 public class ItemDefinition : ScriptableObject
 {
+    // Fuel properties
+    public bool IsFuel => tags != null && System.Array.Exists(tags, t => t == ItemTag.Fuel);
+
+    //[System.Serializable]
+    //public class FuelProperties
+    //{
+    //    public float burnDuration = 10f; // minutes
+    //    public float burnTemperature = 400f;
+    //    public float heatOutput = 1f;
+    //}
+
     [Header("Identity")]
     public string itemID = "";
     public string displayName = "New Item";
@@ -51,16 +62,26 @@ public class ItemDefinition : ScriptableObject
     public ItemOutput[] deconstructOutputs = new ItemOutput[0];
 
     [Header("Fire & Fuel Properties")]
-    [SerializeField] private ItemFuelProperties fuelProperties; // RENAMED to avoid conflict
+    public ItemFuelProperties fuelProperties; // RENAMED to avoid conflict
 
-    public ItemFuelProperties FuelProperties => fuelProperties;
-    public bool IsFuel => fuelProperties != null && fuelProperties.isFuel;
+    //public ItemFuelProperties FuelProperties => fuelProperties;
+    //public bool IsFuel => fuelProperties != null && fuelProperties.isFuel;
+
+    [System.Serializable]
+    public struct FuelProperties
+    {
+        public bool isFuel;
+        public FireInstance.FuelType fuelType;
+        public float burnTime;
+        public float heatOutput;
+    }
 
     [System.Serializable]
     public class ItemFuelProperties // RENAMED CLASS
     {
         public bool isFuel = false;
         public FireInstance.FuelType fuelType = FireInstance.FuelType.Kindling;
+        public float burnTime;
         public float burnDuration = 10f; // minutes
         public float burnTemperature = 400f;
         public float heatOutput = 1f;

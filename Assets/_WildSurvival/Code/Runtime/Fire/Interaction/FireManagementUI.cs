@@ -33,7 +33,10 @@ public class FireManagementUI : MonoBehaviour
         currentFire = null;
         ClearFuelList();
     }
-
+    public void RefreshDisplay()
+    {
+        UpdateDisplay();
+    }
     public void OpenManagementPanel(FireInstance fire, FireInteractionController ctrl)
     {
         currentFire = fire;

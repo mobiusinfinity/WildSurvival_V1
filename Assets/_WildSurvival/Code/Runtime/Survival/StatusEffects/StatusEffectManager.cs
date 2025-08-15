@@ -205,7 +205,7 @@ public class StatusEffectManager : MonoBehaviour
                 existing.currentStacks = Mathf.Min(existing.currentStacks + stacks, existing.maxStacks);
                 existing.timeRemaining = template.duration; // Refresh duration
                 OnEffectStacked?.Invoke(existing);
-                ShowNotification($"{existing.displayName} stacked ({existing.currentStacks}x)", NotificationType.Info);
+                ShowNotification($"{existing.displayName} stacked ({existing.currentStacks}x)", NotificationSystem.NotificationType.Info);
                 return true;
             }
             else if (!allowDuplicateEffects)
@@ -219,7 +219,7 @@ public class StatusEffectManager : MonoBehaviour
         // Check max effects
         if (activeEffects.Count >= maxActiveEffects)
         {
-            ShowNotification("Too many active effects!", NotificationType.Warning);
+            ShowNotification("Too many active effects!", NotificationSystem.NotificationType.Warning);
             return false;
         }
 
@@ -249,8 +249,8 @@ public class StatusEffectManager : MonoBehaviour
             $"+ {newEffect.displayName}" :
             $"- {newEffect.displayName}";
         var notifType = newEffect.type == StatusEffect.EffectType.Buff ?
-            NotificationType.Success :
-            NotificationType.Warning;
+            NotificationSystem.NotificationType.Success :
+            NotificationSystem.NotificationType.Warning;
         ShowNotification(message, notifType);
 
         // Play sound
@@ -288,7 +288,7 @@ public class StatusEffectManager : MonoBehaviour
             AudioSource.PlayClipAtPoint(effect.removeSound, transform.position);
         }
 
-        ShowNotification($"{effect.displayName} removed", NotificationType.Info);
+        ShowNotification($"{effect.displayName} removed", NotificationSystem.NotificationType.Info);
     }
 
     public void RemoveEffectById(string effectId)
@@ -531,7 +531,7 @@ public class StatusEffectManager : MonoBehaviour
         });
     }
 
-    private void ShowNotification(string message, NotificationType type)
+    private void ShowNotification(string message, NotificationSystem.NotificationType type)
     {
         if (notifications != null)
         {

@@ -299,25 +299,25 @@ public class ThirstSystem : MonoBehaviour
             if (isDehydrated && !wasDehydrated)
             {
                 OnDehydrationStarted?.Invoke();
-                ShowNotification("You are becoming dehydrated!", NotificationType.Warning);
+                ShowNotification("You are becoming dehydrated!", NotificationSystem.NotificationType.Warning);
             }
             else if (!isDehydrated && wasDehydrated)
             {
                 OnRehydrated?.Invoke();
-                ShowNotification("You feel rehydrated.", NotificationType.Success);
+                ShowNotification("You feel rehydrated.", NotificationSystem.NotificationType.Success);
             }
 
             // Level change notifications
             switch (currentLevel)
             {
                 case ThirstLevel.Critical:
-                    ShowNotification("CRITICAL: You desperately need water!", NotificationType.Critical);
+                    ShowNotification("CRITICAL: You desperately need water!", NotificationSystem.NotificationType.Critical);
                     break;
                 case ThirstLevel.Dehydrated:
-                    ShowNotification("You are severely dehydrated!", NotificationType.Warning);
+                    ShowNotification("You are severely dehydrated!", NotificationSystem.NotificationType.Warning);
                     break;
                 case ThirstLevel.Parched:
-                    ShowNotification("Your throat is parched...", NotificationType.Info);
+                    ShowNotification("Your throat is parched...", NotificationSystem.NotificationType.Info);
                     break;
             }
         }
@@ -339,7 +339,7 @@ public class ThirstSystem : MonoBehaviour
             if (UnityEngine.Random.value < 0.005f) // 0.5% chance per frame
             {
                 OnThirstDamage?.Invoke();
-                ShowNotification("You're dying of thirst!", NotificationType.Critical);
+                ShowNotification("You're dying of thirst!", NotificationSystem.NotificationType.Critical);
             }
         }
 
@@ -355,7 +355,7 @@ public class ThirstSystem : MonoBehaviour
         // Check stomach capacity
         if (stomachWater >= config.StomachCapacity)
         {
-            ShowNotification("You can't drink any more right now!", NotificationType.Warning);
+            ShowNotification("You can't drink any more right now!", NotificationSystem.NotificationType.Warning);
             return false;
         }
 
@@ -378,7 +378,7 @@ public class ThirstSystem : MonoBehaviour
 
                 if (effect.CausesNausea)
                 {
-                    ShowNotification("You feel nauseous...", NotificationType.Warning);
+                    ShowNotification("You feel nauseous...", NotificationSystem.NotificationType.Warning);
                 }
             }
         }
@@ -387,17 +387,17 @@ public class ThirstSystem : MonoBehaviour
         switch (drink.Type)
         {
             case DrinkItem.DrinkType.Contaminated:
-                ShowNotification($"The {drink.Name} tastes awful!", NotificationType.Warning);
+                ShowNotification($"The {drink.Name} tastes awful!", NotificationSystem.NotificationType.Warning);
                 break;
             case DrinkItem.DrinkType.Coffee:
-                ShowNotification($"The {drink.Name} gives you energy!", NotificationType.Info);
+                ShowNotification($"The {drink.Name} gives you energy!", NotificationSystem.NotificationType.Info);
                 if (playerStats != null) playerStats.ModifyStamina(20f);
                 break;
             case DrinkItem.DrinkType.Alcohol:
-                ShowNotification($"The {drink.Name} makes you feel warm.", NotificationType.Info);
+                ShowNotification($"The {drink.Name} makes you feel warm.", NotificationSystem.NotificationType.Info);
                 break;
             default:
-                ShowNotification($"You drink {drink.Name} (+{effectiveHydration:F0} hydration)", NotificationType.Info);
+                ShowNotification($"You drink {drink.Name} (+{effectiveHydration:F0} hydration)", NotificationSystem.NotificationType.Info);
                 break;
         }
 
@@ -434,7 +434,7 @@ public class ThirstSystem : MonoBehaviour
         currentActivity = activity;
     }
 
-    private void ShowNotification(string message, NotificationType type)
+    private void ShowNotification(string message, NotificationSystem.NotificationType type)
     {
         if (notifications != null)
         {

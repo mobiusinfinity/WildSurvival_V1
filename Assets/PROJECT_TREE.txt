@@ -1,5 +1,5 @@
 PROJECT STRUCTURE
-Generated: 2025-08-15 12:04:38
+Generated: 2025-08-16 00:44:18
 Root: Assets
 ==================================================
 
@@ -71,7 +71,7 @@ Assets
 │   ├── 📁 Editor
 │   └── 📁 Runtime
 ├── 📁 _ThirdParty
-├── 📁 _WildSurvival [321 files]
+├── 📁 _WildSurvival [362 files]
 │   ├── 📁 Audio
 │   │   ├── 📁 Music
 │   │   │   ├── 📁 Ambient
@@ -81,28 +81,32 @@ Assets
 │   │       ├── 📁 Player
 │   │       ├── 📁 UI
 │   │       └── 📁 Wildlife
-│   ├── 📁 Code [98 files]
-│   │   ├── 📁 Editor [30 files]
+│   ├── 📁 Code [132 files]
+│   │   ├── 📁 Editor [33 files]
 │   │   │   ├── 📁 PropertyDrawers
-│   │   │   ├── 📁 Tools [27 files]
+│   │   │   ├── 📁 Tools [30 files]
 │   │   │   │   ├── 📁 BatchProcessor [1 files]
-│   │   │   │   │   └── 📄 UltimateBatchProcessor.cs (38.81 KB)
+│   │   │   │   │   └── 📄 UltimateBatchProcessor.cs (39.44 KB)
 │   │   │   │   ├── 📁 BuildPipeline
-│   │   │   │   ├── 📁 CompleteInventoryToolHub [1 files]
-│   │   │   │   │   └── 📄 CompleteInventoryToolHub.cs (44.64 KB)
-│   │   │   │   ├── 📁 CompleteProjectRestructure
 │   │   │   │   ├── 📁 Database
 │   │   │   │   ├── 📁 Debug
 │   │   │   │   ├── 📁 ErrorReporter [1 files]
 │   │   │   │   │   └── 📄 ErrorReporter.cs (39.18 KB)
-│   │   │   │   ├── 📁 FireSystem [4 files]
+│   │   │   │   ├── 📁 FireSystem [12 files]
+│   │   │   │   │   ├── 📄 FireDebugDisplay.cs (2.07 KB)
+│   │   │   │   │   ├── 📄 FireDebugOverlay.cs (7.54 KB)
 │   │   │   │   │   ├── 📄 FireInventoryToolExtension.cs (229.00 B)
-│   │   │   │   │   ├── 📄 FirePrefabFactory.cs (211.00 B)
+│   │   │   │   │   ├── 📄 FirePrefabCreator.cs (16.66 KB)
+│   │   │   │   │   ├── 📄 FirePrefabFactory.cs (5.16 KB)
+│   │   │   │   │   ├── 📄 FireRecipeBuilder.cs (8.69 KB)
+│   │   │   │   │   ├── 📄 FireSystemChecklistGenerator.cs (5.89 KB)
+│   │   │   │   │   ├── 📄 FireSystemControlPanel.cs (23.94 KB)
 │   │   │   │   │   ├── 📄 FireSystemSetupWizard.cs (219.00 B)
-│   │   │   │   │   └── 📄 FireSystemValidator.cs (215.00 B)
+│   │   │   │   │   ├── 📄 FireSystemValidator.cs (215.00 B)
+│   │   │   │   │   ├── 📄 FireTestSceneBuilder.cs (12.35 KB)
+│   │   │   │   │   └── 📄 FireVisualEffectsEditor.cs (8.44 KB)
+│   │   │   │   ├── 📁 FireTools
 │   │   │   │   ├── 📁 InventoryTool
-│   │   │   │   ├── 📁 MenuFixer [1 files]
-│   │   │   │   │   └── 📄 WildSurvivalMenuFixer.cs (13.76 KB)
 │   │   │   │   ├── 📁 MigrationAssistant [1 files]
 │   │   │   │   │   └── 📄 WildSurvivalMigrationAssistant.cs (15.23 KB)
 │   │   │   │   ├── 📁 ProgressQuest
@@ -135,23 +139,23 @@ Assets
 │   │   │   │   │   └── 📄 WorkingInventorySystem.cs (40.93 KB)
 │   │   │   │   ├── 📁 WSUltimateGitHubWindow [1 files]
 │   │   │   │   │   └── 📄 WSUltimateGitHubWindow.cs (33.18 KB)
-│   │   │   │   ├── 📄 ErrorReporterMenuFix.cs (6.86 KB)
 │   │   │   │   ├── 📄 ErrorReporterPatch.cs (305.00 B)
-│   │   │   │   ├── 📄 MenuItemScanner.cs (5.80 KB)
-│   │   │   │   ├── 📄 QuickToolTest.cs (4.65 KB)
-│   │   │   │   └── 📄 UltimateInventoryToolHub.cs (189.89 KB)
+│   │   │   │   └── 📄 UltimateInventoryToolHub.cs (184.48 KB)
 │   │   │   ├── 📁 Validators
 │   │   │   ├── 📁 Windows
 │   │   │   ├── 📄 CreateFreshDatabases.cs (1.53 KB)
 │   │   │   ├── 📄 FixFireSystemDuplicates.cs (2.75 KB)
-│   │   │   └── 📄 SetupFireSystem.cs (1.67 KB)
-│   │   └── 📁 Runtime [68 files]
-│   │       ├── 📁 AI
+│   │   │   └── 📄 SetupFireSystem.cs (1.90 KB)
+│   │   └── 📁 Runtime [99 files]
+│   │       ├── 📁 AI [1 files]
 │   │       │   ├── 📁 Core
 │   │       │   ├── 📁 Navigation
-│   │       │   └── 📁 Wildlife
-│   │       │       └── 📁 Behaviors
-│   │       ├── 📁 Audio
+│   │       │   └── 📁 Wildlife [1 files]
+│   │       │       └── 📁 Behaviors [1 files]
+│   │       │           └── 📄 AnimalAI.cs (2.17 KB)
+│   │       ├── 📁 Audio [2 files]
+│   │       │   ├── 📄 FireAudioManager.cs (5.25 KB)
+│   │       │   └── 📄 FireSoundBank.cs (224.00 B)
 │   │       ├── 📁 Combat
 │   │       │   ├── 📁 Core
 │   │       │   └── 📁 Weapons
@@ -163,7 +167,7 @@ Assets
 │   │       │   │   └── 📄 EventBus.cs (1.60 KB)
 │   │       │   ├── 📁 Managers [3 files]
 │   │       │   │   ├── 📄 GameManager.cs (2.51 KB)
-│   │       │   │   ├── 📄 HungerSystem.cs (12.19 KB)
+│   │       │   │   ├── 📄 HungerSystem.cs (12.31 KB)
 │   │       │   │   └── 📄 PoolManager.cs (3.01 KB)
 │   │       │   ├── 📁 Patterns
 │   │       │   └── 📁 Utilities
@@ -171,22 +175,27 @@ Assets
 │   │       │       ├── 📁 Helpers
 │   │       │       └── 📁 Math
 │   │       ├── 📁 Crafting [6 files]
-│   │       │   ├── 📄 CraftingManager.cs (14.50 KB)
+│   │       │   ├── 📄 CraftingManager.cs (14.51 KB)
 │   │       │   ├── 📄 CraftingRecipe.cs (10.69 KB)
 │   │       │   ├── 📄 CraftingSystemBridge.cs (15.79 KB)
 │   │       │   ├── 📄 CraftingSystemTester.cs (4.88 KB)
 │   │       │   ├── 📄 CraftingUI.cs (29.50 KB)
-│   │       │   └── 📄 WorkbenchSystem.cs (19.82 KB)
-│   │       ├── 📁 Data [8 files]
+│   │       │   └── 📄 WorkbenchSystem.cs (19.95 KB)
+│   │       ├── 📁 Data [12 files]
 │   │       │   ├── 📁 Databases [5 files]
 │   │       │   │   ├── 📦 ItemDatabase.asset (4.99 KB)
-│   │       │   │   ├── 📄 ItemDatabase.cs (9.09 KB)
+│   │       │   │   ├── 📄 ItemDatabase.cs (9.56 KB)
 │   │       │   │   ├── 📄 ItemDataMigration.cs (3.61 KB)
 │   │       │   │   ├── 📦 RecipeDatabase.asset (2.58 KB)
 │   │       │   │   └── 📄 RecipeDatabase.cs (5.43 KB)
 │   │       │   ├── 📁 Definitions [2 files]
-│   │       │   │   ├── 📄 ItemDefinition.cs (5.97 KB)
+│   │       │   │   ├── 📄 ItemDefinition.cs (6.54 KB)
 │   │       │   │   └── 📄 RecipeDefinition.cs (2.34 KB)
+│   │       │   ├── 📁 Enums [4 files]
+│   │       │   │   ├── 📄 CookingState.cs (142.00 B)
+│   │       │   │   ├── 📄 FireState.cs (136.00 B)
+│   │       │   │   ├── 📄 FuelType.cs (134.00 B)
+│   │       │   │   └── 📄 TemperatureUnit.cs (148.00 B)
 │   │       │   └── 📁 Instances [1 files]
 │   │       │       └── 📄 ItemInstance.cs (2.47 KB)
 │   │       ├── 📁 Environment
@@ -194,39 +203,48 @@ Assets
 │   │       │   ├── 📁 Time
 │   │       │   ├── 📁 Vegetation
 │   │       │   └── 📁 Weather
-│   │       ├── 📁 Fire [23 files]
+│   │       ├── 📁 Fire [31 files]
 │   │       │   ├── 📁 Advanced [4 files]
 │   │       │   │   ├── 📄 FireDamageSystem.cs (233.00 B)
 │   │       │   │   ├── 📄 FirePropagationSystem.cs (242.00 B)
 │   │       │   │   ├── 📄 FlammableObject.cs (234.00 B)
 │   │       │   │   └── 📄 SmokeSignalSystem.cs (234.00 B)
-│   │       │   ├── 📁 Cooking [4 files]
+│   │       │   ├── 📁 Cooking [3 files]
 │   │       │   │   ├── 📄 AdvancedCookingSystem.cs (238.00 B)
-│   │       │   │   ├── 📄 CookingSystem.cs (230.00 B)
-│   │       │   │   ├── 📄 CookingUI.cs (2.82 KB)
+│   │       │   │   ├── 📄 CookingSystem.cs (4.61 KB)
 │   │       │   │   └── 📄 WaterPurificationSystem.cs (240.00 B)
-│   │       │   ├── 📁 Core [3 files]
-│   │       │   │   ├── 📄 FireInstance.cs (30.91 KB)
-│   │       │   │   ├── 📄 FireSystemConfiguration.cs (17.04 KB)
-│   │       │   │   └── 📄 IgnitionSource.cs (145.00 B)
+│   │       │   ├── 📁 Core [7 files]
+│   │       │   │   ├── 📄 FireEffectsController.cs (232.00 B)
+│   │       │   │   ├── 📄 FireInstance.cs (47.73 KB)
+│   │       │   │   ├── 📄 FireManager.cs (222.00 B)
+│   │       │   │   ├── 📄 FirePoolManager.cs (226.00 B)
+│   │       │   │   ├── 📄 FireStateController.cs (230.00 B)
+│   │       │   │   ├── 📄 FireSystemConfiguration.cs (20.37 KB)
+│   │       │   │   └── 📄 IgnitionSource.cs (3.40 KB)
 │   │       │   ├── 📁 Environment [2 files]
 │   │       │   │   ├── 📄 FireEnvironmentalEffects.cs (243.00 B)
 │   │       │   │   └── 📄 PlayerWarmthSystem.cs (239.00 B)
 │   │       │   ├── 📁 Extensions [3 files]
-│   │       │   │   ├── 📄 FireInstanceExtensions.cs (241.00 B)
+│   │       │   │   ├── 📄 FireInstanceExtensions.cs (7.41 KB)
 │   │       │   │   ├── 📄 FlammableMaterialExtensions.cs (248.00 B)
 │   │       │   │   └── 📄 PlayerFireInteractions.cs (241.00 B)
 │   │       │   ├── 📁 Integration [1 files]
 │   │       │   │   └── 📄 FireInventoryBridge.cs (238.00 B)
 │   │       │   ├── 📁 Interaction [3 files]
 │   │       │   │   ├── 📄 CampfireBuilder.cs (236.00 B)
-│   │       │   │   ├── 📄 FireInteractionController.cs (21.49 KB)
-│   │       │   │   └── 📄 FireManagementUI.cs (5.08 KB)
+│   │       │   │   ├── 📄 FireInteractionController.cs (21.55 KB)
+│   │       │   │   └── 📄 FireManagementUI.cs (5.15 KB)
+│   │       │   ├── 📁 Interfaces [5 files]
+│   │       │   │   ├── 📄 ICookable.cs (264.00 B)
+│   │       │   │   ├── 📄 IDamageable.cs (2.57 KB)
+│   │       │   │   ├── 📄 IFlammable.cs (2.79 KB)
+│   │       │   │   ├── 📄 IFuelSource.cs (228.00 B)
+│   │       │   │   └── 📄 IIgnitable.cs (227.00 B)
 │   │       │   └── 📁 Utils [3 files]
 │   │       │       ├── 📄 FireEventManager.cs (235.00 B)
 │   │       │       ├── 📄 FireStatistics.cs (235.00 B)
 │   │       │       └── 📄 SpatialHashGrid.cs (232.00 B)
-│   │       ├── 📁 Player [5 files]
+│   │       ├── 📁 Player [6 files]
 │   │       │   ├── 📁 Camera [1 files]
 │   │       │   │   └── 📄 ThirdPersonCameraController.cs (12.76 KB)
 │   │       │   ├── 📁 Controller [3 files]
@@ -234,9 +252,12 @@ Assets
 │   │       │   │   ├── 📄 PlayerController_OLD.cs (1.12 KB)
 │   │       │   │   └── 📄 PlayerMovementController.cs (12.04 KB)
 │   │       │   ├── 📁 Interactions
+│   │       │   ├── 📁 PlayerInventory [1 files]
+│   │       │   │   └── 📄 PlayerInventory.cs (8.78 KB)
 │   │       │   └── 📁 Stats [1 files]
-│   │       │       └── 📄 PlayerStats.cs (8.95 KB)
-│   │       ├── 📁 SaveSystem
+│   │       │       └── 📄 PlayerStats.cs (14.59 KB)
+│   │       ├── 📁 SaveSystem [1 files]
+│   │       │   └── 📄 FireSaveData.cs (7.56 KB)
 │   │       ├── 📁 Survival [14 files]
 │   │       │   ├── 📁 Building
 │   │       │   │   └── 📁 Structures
@@ -249,7 +270,7 @@ Assets
 │   │       │   │   ├── 📁 Events [1 files]
 │   │       │   │   │   └── 📄 InventoryEvents.cs (10.76 KB)
 │   │       │   │   ├── 📁 Items [3 files]
-│   │       │   │   │   ├── 📄 ItemData.cs (3.31 KB)
+│   │       │   │   │   ├── 📄 ItemData.cs (4.18 KB)
 │   │       │   │   │   ├── 📄 ItemType.cs (1.85 KB)
 │   │       │   │   │   └── 📄 ItemTypeExtensionsAddon.cs (1.99 KB)
 │   │       │   │   └── 📁 UI [4 files]
@@ -259,17 +280,36 @@ Assets
 │   │       │   │       └── 📄 SpatialInventoryGrid.cs (9.18 KB)
 │   │       │   ├── 📁 StatusEffects [1 files]
 │   │       │   │   ├── 📁 Effects
-│   │       │   │   └── 📄 StatusEffectManager.cs (18.87 KB)
+│   │       │   │   └── 📄 StatusEffectManager.cs (18.98 KB)
 │   │       │   ├── 📁 Temperature [1 files]
 │   │       │   │   └── 📄 TemperatureSystem.cs (4.71 KB)
 │   │       │   └── 📁 Thirst [1 files]
-│   │       │       └── 📄 ThirstSystem.cs (15.42 KB)
-│   │       ├── 📁 Test [1 files]
-│   │       │   └── 📄 GitHubToolTest.cs (1.69 KB)
-│   │       └── 📁 UI [5 files]
+│   │       │       └── 📄 ThirstSystem.cs (15.66 KB)
+│   │       ├── 📁 Systems [5 files]
+│   │       │   ├── 📁 Performance [2 files]
+│   │       │   │   ├── 📄 FireLODSystem.cs (224.00 B)
+│   │       │   │   └── 📄 FirePerformanceOptimizer.cs (6.67 KB)
+│   │       │   ├── 📁 Tutorial [1 files]
+│   │       │   │   └── 📄 FireTutorialSystem.cs (21.79 KB)
+│   │       │   └── 📁 Weather [2 files]
+│   │       │       ├── 📄 WeatherEffectsOnFire.cs (231.00 B)
+│   │       │       └── 📄 WeatherSystem.cs (22.21 KB)
+│   │       ├── 📁 Test [9 files]
+│   │       │   ├── 📁 Fire [6 files]
+│   │       │   │   ├── 📄 FireDebugCommands.cs (228.00 B)
+│   │       │   │   ├── 📄 FireSystemTester.cs (227.00 B)
+│   │       │   │   ├── 📄 FireSystemTestSceneMenu.cs (1.52 KB)
+│   │       │   │   ├── 📄 FireSystemTestSetup.cs (17.09 KB)
+│   │       │   │   ├── 📄 FireTestController.cs (4.59 KB)
+│   │       │   │   └── 📄 FireTestMenu.cs (3.81 KB)
+│   │       │   ├── 📄 FloatingAnimation.cs (1.63 KB)
+│   │       │   ├── 📄 GitHubToolTest.cs (1.69 KB)
+│   │       │   └── 📄 TestItemPickup.cs (4.04 KB)
+│   │       └── 📁 UI [6 files]
 │   │           ├── 📁 Core [1 files]
-│   │           │   └── 📄 NotificationSystem.cs (8.19 KB)
-│   │           ├── 📁 Fire
+│   │           │   └── 📄 NotificationSystem.cs (8.32 KB)
+│   │           ├── 📁 Fire [1 files]
+│   │           │   └── 📄 CookingUI.cs (2.82 KB)
 │   │           ├── 📁 HUD
 │   │           ├── 📁 Journal [4 files]
 │   │           │   ├── 📁 Core [1 files]
@@ -538,25 +578,37 @@ Assets
 │   │   ├── 📁 Effects
 │   │   ├── 📁 Environment
 │   │   ├── 📁 Fire
+│   │   │   ├── 📁 Debug
+│   │   │   ├── 📁 Effects
+│   │   │   ├── 📁 Particles
+│   │   │   ├── 📁 Types
+│   │   │   └── 📁 UI
 │   │   ├── 📁 Items
 │   │   ├── 📁 Structures
 │   │   ├── 📁 UI
 │   │   └── 📁 Wildlife
-│   ├── 📁 Resources
+│   ├── 📁 Resources [5 files]
 │   │   ├── 📁 Audio
 │   │   ├── 📁 Data
-│   │   ├── 📁 Materials
+│   │   ├── 📁 Materials [5 files]
+│   │   │   ├── 🎨 Brown.mat (7.85 KB)
+│   │   │   ├── 🎨 Gray.mat (7.85 KB)
+│   │   │   ├── 🎨 Green.mat (7.86 KB)
+│   │   │   ├── 🎨 LightBrown.mat (7.86 KB)
+│   │   │   └── 🎨 LightGreen.mat (7.86 KB)
 │   │   └── 📁 Prefabs
-│   ├── 📁 Scenes [6 files]
+│   ├── 📁 Scenes [8 files]
 │   │   ├── 📁 Core [2 files]
 │   │   │   ├── 🎬 _Bootstrap.unity (7.92 KB)
 │   │   │   └── 🎬 _Persistent.unity (11.63 KB)
 │   │   ├── 📁 Development [2 files]
 │   │   │   ├── 🎬 Phase1_PlayerTest.unity (27.54 KB)
 │   │   │   └── 🎬 Phase2_InventoryTest.unity (49.25 KB)
-│   │   └── 📁 World [2 files]
-│   │       ├── 🎬 MainGame.unity (15.61 KB)
-│   │       └── 🎬 World_Prototype.unity (11.64 KB)
+│   │   ├── 📁 World [2 files]
+│   │   │   ├── 🎬 MainGame.unity (15.61 KB)
+│   │   │   └── 🎬 World_Prototype.unity (11.64 KB)
+│   │   ├── 🎬 FireSystemTest.unity (12.86 KB)
+│   │   └── 🎬 FireSystemTestScene.unity (289.43 KB)
 │   ├── 📁 Settings
 │   │   ├── 📁 Audio
 │   │   ├── 📁 HDRP
@@ -572,5 +624,5 @@ Assets
 └── 📄 PlayerControls.cs (26.55 KB)
 
 ==================================================
-Total: 219 folders, 348 files
-Size: 4.09 MB
+Total: 230 folders, 389 files
+Size: 4.59 MB

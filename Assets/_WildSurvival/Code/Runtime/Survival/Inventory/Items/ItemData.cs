@@ -49,14 +49,21 @@ public class ItemData : ScriptableObject
     public bool hasCraftingTag = false;
     public string[] craftingTags = new string[0];
 
+    // Change these from { get; } to { get; set; }
+    public string ItemName { get; set; }
+    public string Description { get; set; }
+    public float Weight { get; set; }
+    public Sprite Icon { get; set; }
+    public ItemType Type { get; set; }
+
     // Properties for compatibility (capitalized versions)
     public string ItemID => itemID;
-    public string ItemName => itemName;
-    public string Description => description;
-    public Sprite Icon => icon;
-    public ItemType Type => itemType;
+    //public string ItemName => itemName;
+    //public string Description => description;
+    //public Sprite Icon => icon;
+    //public ItemType Type => itemType;
     public int MaxStackSize => maxStackSize;
-    public float Weight => weight;
+    //public float Weight => weight;
     public int Value => value;
     public int SortOrder => sortOrder;  // Added SortOrder property
 
@@ -103,6 +110,30 @@ public class ItemData : ScriptableObject
         {
             spoilTime = Mathf.Max(1f, spoilTime);
         }
+    }
+
+    // Constructor
+    public ItemData()
+    {
+        ItemName = "Unknown Item";
+        Description = "";
+        Weight = 1f;
+        Type = ItemType.Misc;
+    }
+
+    // Add conversion from ItemDefinition
+    public static implicit operator ItemData(ItemDefinition definition)
+    {
+        if (definition == null) return null;
+
+        return new ItemData
+        {
+            ItemName = definition.displayName,
+            Description = definition.description,
+            Weight = definition.weight,
+            Icon = definition.icon,
+            Type = definition.itemType
+        };
     }
 }
 
