@@ -253,7 +253,7 @@ public class WSUltimateGitHubWindow : EditorWindow
                 }
             }
 
-            using (var scroll = new EditorGUILayout.ScrollViewScope(_scrollStatus, GUILayout.Height(150)))
+            using (var scroll = new EditorGUILayout.ScrollViewScope(_scrollStatus, GUILayout.Height(120)))
             {
                 _scrollStatus = scroll.scrollPosition;
 

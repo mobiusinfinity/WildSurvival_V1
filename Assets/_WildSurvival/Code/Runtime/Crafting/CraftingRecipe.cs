@@ -55,11 +55,12 @@ public class CraftingRecipe : ScriptableObject
     public string weatherRequirement = "Any";
     public string timeRequirement = "Any";
 
+
     // ====== ENUMS MOVED TO TOP LEVEL ======
     public enum WorkbenchType
     {
         None,           // Can craft in inventory
-        CraftingBench,  // Basic workbench (renamed from Workbench)
+        WorkBench,  // Basic workbench (renamed from Workbench)
         Forge,          // For metal working
         Campfire,       // For cooking (renamed from CookingFire)
         ChemistryLab,   // For advanced items
@@ -303,7 +304,7 @@ public static class WorkbenchTypeExtensions
         return type switch
         {
             CraftingRecipe.WorkbenchType.None => "Inventory",
-            CraftingRecipe.WorkbenchType.CraftingBench => "Crafting Bench",
+            CraftingRecipe.WorkbenchType.WorkBench => "Crafting Work Bench",
             CraftingRecipe.WorkbenchType.Forge => "Forge",
             CraftingRecipe.WorkbenchType.Campfire => "Campfire",
             CraftingRecipe.WorkbenchType.ChemistryLab => "Chemistry Lab",
@@ -323,7 +324,7 @@ public static class WorkbenchTypeExtensions
         return type switch
         {
             CraftingRecipe.WorkbenchType.None => Color.white,
-            CraftingRecipe.WorkbenchType.CraftingBench => new Color(0.6f, 0.4f, 0.2f), // Brown
+            CraftingRecipe.WorkbenchType.WorkBench => new Color(0.6f, 0.4f, 0.2f), // Brown
             CraftingRecipe.WorkbenchType.Forge => new Color(1f, 0.4f, 0f), // Orange
             CraftingRecipe.WorkbenchType.Campfire => new Color(1f, 0.6f, 0f), // Fire orange
             CraftingRecipe.WorkbenchType.ChemistryLab => new Color(0f, 1f, 0.5f), // Cyan

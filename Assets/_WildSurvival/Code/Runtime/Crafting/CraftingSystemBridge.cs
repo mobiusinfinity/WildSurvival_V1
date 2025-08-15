@@ -179,7 +179,7 @@ public static class CraftingSystemBridge
         definition.recipeName = recipe.displayName;
         definition.description = recipe.description;
         definition.icon = recipe.icon;
-        definition.category = ParseCraftingCategory(recipe.category);
+        definition.category = recipe.category;
         definition.tier = recipe.requiredPlayerLevel;
         definition.isKnownByDefault = recipe.unlockedByDefault;
         definition.baseCraftTime = recipe.craftingTime;
@@ -251,7 +251,7 @@ public static class CraftingSystemBridge
         return station switch
         {
             WorkstationType.None => CraftingRecipe.WorkbenchType.None,
-            WorkstationType.Workbench => CraftingRecipe.WorkbenchType.CraftingBench,
+            WorkstationType.WorkBench => CraftingRecipe.WorkbenchType.WorkBench,
             WorkstationType.Forge => CraftingRecipe.WorkbenchType.Forge,
             WorkstationType.Campfire => CraftingRecipe.WorkbenchType.Campfire,
             WorkstationType.Anvil => CraftingRecipe.WorkbenchType.Anvil,
@@ -269,7 +269,7 @@ public static class CraftingSystemBridge
         return type switch
         {
             CraftingRecipe.WorkbenchType.None => WorkstationType.None,
-            CraftingRecipe.WorkbenchType.CraftingBench => WorkstationType.Workbench,
+            CraftingRecipe.WorkbenchType.WorkBench => WorkstationType.WorkBench,
             CraftingRecipe.WorkbenchType.Forge => WorkstationType.Forge,
             CraftingRecipe.WorkbenchType.Campfire => WorkstationType.Campfire,
             CraftingRecipe.WorkbenchType.Anvil => WorkstationType.Anvil,

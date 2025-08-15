@@ -1,5 +1,5 @@
 PROJECT STRUCTURE
-Generated: 2025-08-14 22:31:13
+Generated: 2025-08-15 12:04:38
 Root: Assets
 ==================================================
 
@@ -14,11 +14,40 @@ Assets
 │   ├── 📦 HDRP High Fidelity.asset (15.51 KB)
 │   ├── 📦 HDRP Performant.asset (15.57 KB)
 │   └── 📦 SkyandFogSettingsProfile.asset (9.57 KB)
+├── 📁 TextMesh Pro [37 files]
+│   ├── 📁 Fonts [2 files]
+│   ├── 📁 Resources [9 files]
+│   │   ├── 📁 Fonts & Materials [4 files]
+│   │   │   ├── 🎨 LiberationSans SDF - Drop Shadow.mat (2.91 KB)
+│   │   │   ├── 📦 LiberationSans SDF - Fallback.asset (9.15 KB)
+│   │   │   ├── 🎨 LiberationSans SDF - Outline.mat (2.82 KB)
+│   │   │   └── 📦 LiberationSans SDF.asset (2.15 MB)
+│   │   ├── 📁 Sprite Assets [1 files]
+│   │   │   └── 📦 EmojiOne.asset (13.13 KB)
+│   │   ├── 📁 Style Sheets [1 files]
+│   │   │   └── 📦 Default Style Sheet.asset (5.41 KB)
+│   │   └── 📦 TMP Settings.asset (1.81 KB)
+│   ├── 📁 Shaders [23 files]
+│   │   ├── ✨ TMP_Bitmap-Custom-Atlas.shader (3.75 KB)
+│   │   ├── ✨ TMP_Bitmap-Mobile.shader (3.98 KB)
+│   │   ├── ✨ TMP_Bitmap.shader (3.75 KB)
+│   │   ├── ✨ TMP_SDF Overlay.shader (10.79 KB)
+│   │   ├── ✨ TMP_SDF SSD.shader (12.15 KB)
+│   │   ├── ✨ TMP_SDF-Mobile Masking.shader (8.08 KB)
+│   │   ├── ✨ TMP_SDF-Mobile Overlay.shader (7.89 KB)
+│   │   ├── ✨ TMP_SDF-Mobile SSD.shader (2.99 KB)
+│   │   ├── ✨ TMP_SDF-Mobile-2-Pass.shader (11.52 KB)
+│   │   ├── ✨ TMP_SDF-Mobile.shader (7.88 KB)
+│   │   ├── ✨ TMP_SDF-Surface-Mobile.shader (3.44 KB)
+│   │   ├── ✨ TMP_SDF-Surface.shader (4.25 KB)
+│   │   ├── ✨ TMP_SDF.shader (10.77 KB)
+│   │   └── ✨ TMP_Sprite.shader (3.37 KB)
+│   └── 📁 Sprites [3 files]
 ├── 📁 _DevTools
 │   ├── 📁 Debugging
 │   ├── 📁 Profiling
 │   └── 📁 Prototyping
-├── 📁 _Project [11 files]
+├── 📁 _Project [9 files]
 │   ├── 📁 Audio
 │   ├── 📁 Code [2 files]
 │   │   ├── 📁 Editor [2 files]
@@ -30,9 +59,7 @@ Assets
 │   │       ├── 📁 Systems
 │   │       └── 📁 UI
 │   ├── 📁 Content
-│   ├── 📁 Data [2 files]
-│   │   ├── 📦 ItemDatabase.asset (393.00 B)
-│   │   └── 📦 RecipeDatabase.asset (399.00 B)
+│   ├── 📁 Data
 │   ├── 📁 Docs [6 files]
 │   │   ├── 📁 Diagrams [1 files]
 │   │   └── 📁 Workflow [1 files]
@@ -44,7 +71,7 @@ Assets
 │   ├── 📁 Editor
 │   └── 📁 Runtime
 ├── 📁 _ThirdParty
-├── 📁 _WildSurvival [192 files]
+├── 📁 _WildSurvival [321 files]
 │   ├── 📁 Audio
 │   │   ├── 📁 Music
 │   │   │   ├── 📁 Ambient
@@ -54,22 +81,25 @@ Assets
 │   │       ├── 📁 Player
 │   │       ├── 📁 UI
 │   │       └── 📁 Wildlife
-│   ├── 📁 Code [66 files]
-│   │   ├── 📁 Editor [26 files]
+│   ├── 📁 Code [98 files]
+│   │   ├── 📁 Editor [30 files]
 │   │   │   ├── 📁 PropertyDrawers
-│   │   │   ├── 📁 Tools [26 files]
-│   │   │   │   ├── 📁 BatchProcessor [2 files]
-│   │   │   │   │   ├── 📦 MasterItemDatabase.asset (419.00 B)
-│   │   │   │   │   └── 📄 UltimateBatchProcessor.cs (38.83 KB)
+│   │   │   ├── 📁 Tools [27 files]
+│   │   │   │   ├── 📁 BatchProcessor [1 files]
+│   │   │   │   │   └── 📄 UltimateBatchProcessor.cs (38.81 KB)
 │   │   │   │   ├── 📁 BuildPipeline
 │   │   │   │   ├── 📁 CompleteInventoryToolHub [1 files]
 │   │   │   │   │   └── 📄 CompleteInventoryToolHub.cs (44.64 KB)
-│   │   │   │   ├── 📁 CompleteProjectRestructure [1 files]
-│   │   │   │   │   └── 📄 CompleteProjectRestructure.cs (66.63 KB)
+│   │   │   │   ├── 📁 CompleteProjectRestructure
 │   │   │   │   ├── 📁 Database
 │   │   │   │   ├── 📁 Debug
 │   │   │   │   ├── 📁 ErrorReporter [1 files]
 │   │   │   │   │   └── 📄 ErrorReporter.cs (39.18 KB)
+│   │   │   │   ├── 📁 FireSystem [4 files]
+│   │   │   │   │   ├── 📄 FireInventoryToolExtension.cs (229.00 B)
+│   │   │   │   │   ├── 📄 FirePrefabFactory.cs (211.00 B)
+│   │   │   │   │   ├── 📄 FireSystemSetupWizard.cs (219.00 B)
+│   │   │   │   │   └── 📄 FireSystemValidator.cs (215.00 B)
 │   │   │   │   ├── 📁 InventoryTool
 │   │   │   │   ├── 📁 MenuFixer [1 files]
 │   │   │   │   │   └── 📄 WildSurvivalMenuFixer.cs (13.76 KB)
@@ -89,10 +119,9 @@ Assets
 │   │   │   │   ├── 📁 ProjectTreeGenerator [1 files]
 │   │   │   │   │   └── 📄 ProjectTreeGenerator.cs (31.64 KB)
 │   │   │   │   ├── 📁 TestRecipeCreator [1 files]
-│   │   │   │   │   └── 📄 TestRecipeCreator.cs (9.03 KB)
+│   │   │   │   │   └── 📄 TestRecipeCreator.cs (9.02 KB)
 │   │   │   │   ├── 📁 TreeGenerator
-│   │   │   │   ├── 📁 UltimateInventoryTool [3 files]
-│   │   │   │   │   ├── 📄 UltimateInventoryTool.cs (43.71 KB)
+│   │   │   │   ├── 📁 UltimateInventoryTool [2 files]
 │   │   │   │   │   ├── 📄 WildSurvivalDatabaseGenerator.cs (82.40 KB)
 │   │   │   │   │   └── 📄 WildSurvivalSetup.cs (3.80 KB)
 │   │   │   │   ├── 📁 Utilities
@@ -105,15 +134,18 @@ Assets
 │   │   │   │   ├── 📁 WorkingInventorySystem [1 files]
 │   │   │   │   │   └── 📄 WorkingInventorySystem.cs (40.93 KB)
 │   │   │   │   ├── 📁 WSUltimateGitHubWindow [1 files]
-│   │   │   │   │   └── 📄 WSUltimateGitHubWindow.cs (39.79 KB)
+│   │   │   │   │   └── 📄 WSUltimateGitHubWindow.cs (33.18 KB)
 │   │   │   │   ├── 📄 ErrorReporterMenuFix.cs (6.86 KB)
 │   │   │   │   ├── 📄 ErrorReporterPatch.cs (305.00 B)
 │   │   │   │   ├── 📄 MenuItemScanner.cs (5.80 KB)
 │   │   │   │   ├── 📄 QuickToolTest.cs (4.65 KB)
-│   │   │   │   └── 📄 UltimateInventoryToolHub.cs (103.39 KB)
+│   │   │   │   └── 📄 UltimateInventoryToolHub.cs (189.89 KB)
 │   │   │   ├── 📁 Validators
-│   │   │   └── 📁 Windows
-│   │   └── 📁 Runtime [40 files]
+│   │   │   ├── 📁 Windows
+│   │   │   ├── 📄 CreateFreshDatabases.cs (1.53 KB)
+│   │   │   ├── 📄 FixFireSystemDuplicates.cs (2.75 KB)
+│   │   │   └── 📄 SetupFireSystem.cs (1.67 KB)
+│   │   └── 📁 Runtime [68 files]
 │   │       ├── 📁 AI
 │   │       │   ├── 📁 Core
 │   │       │   ├── 📁 Navigation
@@ -138,19 +170,23 @@ Assets
 │   │       │       ├── 📁 Extensions
 │   │       │       ├── 📁 Helpers
 │   │       │       └── 📁 Math
-│   │       ├── 📁 Crafting [5 files]
+│   │       ├── 📁 Crafting [6 files]
 │   │       │   ├── 📄 CraftingManager.cs (14.50 KB)
-│   │       │   ├── 📄 CraftingRecipe.cs (10.70 KB)
-│   │       │   ├── 📄 CraftingSystemBridge.cs (15.82 KB)
-│   │       │   ├── 📄 CraftingUI.cs (28.54 KB)
+│   │       │   ├── 📄 CraftingRecipe.cs (10.69 KB)
+│   │       │   ├── 📄 CraftingSystemBridge.cs (15.79 KB)
+│   │       │   ├── 📄 CraftingSystemTester.cs (4.88 KB)
+│   │       │   ├── 📄 CraftingUI.cs (29.50 KB)
 │   │       │   └── 📄 WorkbenchSystem.cs (19.82 KB)
-│   │       ├── 📁 Data [5 files]
-│   │       │   ├── 📁 Databases [2 files]
-│   │       │   │   ├── 📄 ItemDatabase.cs (1.22 KB)
-│   │       │   │   └── 📄 RecipeDatabase.cs (3.52 KB)
+│   │       ├── 📁 Data [8 files]
+│   │       │   ├── 📁 Databases [5 files]
+│   │       │   │   ├── 📦 ItemDatabase.asset (4.99 KB)
+│   │       │   │   ├── 📄 ItemDatabase.cs (9.09 KB)
+│   │       │   │   ├── 📄 ItemDataMigration.cs (3.61 KB)
+│   │       │   │   ├── 📦 RecipeDatabase.asset (2.58 KB)
+│   │       │   │   └── 📄 RecipeDatabase.cs (5.43 KB)
 │   │       │   ├── 📁 Definitions [2 files]
-│   │       │   │   ├── 📄 ItemDefinition.cs (3.81 KB)
-│   │       │   │   └── 📄 RecipeDefinition.cs (2.30 KB)
+│   │       │   │   ├── 📄 ItemDefinition.cs (5.97 KB)
+│   │       │   │   └── 📄 RecipeDefinition.cs (2.34 KB)
 │   │       │   └── 📁 Instances [1 files]
 │   │       │       └── 📄 ItemInstance.cs (2.47 KB)
 │   │       ├── 📁 Environment
@@ -158,6 +194,38 @@ Assets
 │   │       │   ├── 📁 Time
 │   │       │   ├── 📁 Vegetation
 │   │       │   └── 📁 Weather
+│   │       ├── 📁 Fire [23 files]
+│   │       │   ├── 📁 Advanced [4 files]
+│   │       │   │   ├── 📄 FireDamageSystem.cs (233.00 B)
+│   │       │   │   ├── 📄 FirePropagationSystem.cs (242.00 B)
+│   │       │   │   ├── 📄 FlammableObject.cs (234.00 B)
+│   │       │   │   └── 📄 SmokeSignalSystem.cs (234.00 B)
+│   │       │   ├── 📁 Cooking [4 files]
+│   │       │   │   ├── 📄 AdvancedCookingSystem.cs (238.00 B)
+│   │       │   │   ├── 📄 CookingSystem.cs (230.00 B)
+│   │       │   │   ├── 📄 CookingUI.cs (2.82 KB)
+│   │       │   │   └── 📄 WaterPurificationSystem.cs (240.00 B)
+│   │       │   ├── 📁 Core [3 files]
+│   │       │   │   ├── 📄 FireInstance.cs (30.91 KB)
+│   │       │   │   ├── 📄 FireSystemConfiguration.cs (17.04 KB)
+│   │       │   │   └── 📄 IgnitionSource.cs (145.00 B)
+│   │       │   ├── 📁 Environment [2 files]
+│   │       │   │   ├── 📄 FireEnvironmentalEffects.cs (243.00 B)
+│   │       │   │   └── 📄 PlayerWarmthSystem.cs (239.00 B)
+│   │       │   ├── 📁 Extensions [3 files]
+│   │       │   │   ├── 📄 FireInstanceExtensions.cs (241.00 B)
+│   │       │   │   ├── 📄 FlammableMaterialExtensions.cs (248.00 B)
+│   │       │   │   └── 📄 PlayerFireInteractions.cs (241.00 B)
+│   │       │   ├── 📁 Integration [1 files]
+│   │       │   │   └── 📄 FireInventoryBridge.cs (238.00 B)
+│   │       │   ├── 📁 Interaction [3 files]
+│   │       │   │   ├── 📄 CampfireBuilder.cs (236.00 B)
+│   │       │   │   ├── 📄 FireInteractionController.cs (21.49 KB)
+│   │       │   │   └── 📄 FireManagementUI.cs (5.08 KB)
+│   │       │   └── 📁 Utils [3 files]
+│   │       │       ├── 📄 FireEventManager.cs (235.00 B)
+│   │       │       ├── 📄 FireStatistics.cs (235.00 B)
+│   │       │       └── 📄 SpatialHashGrid.cs (232.00 B)
 │   │       ├── 📁 Player [5 files]
 │   │       │   ├── 📁 Camera [1 files]
 │   │       │   │   └── 📄 ThirdPersonCameraController.cs (12.76 KB)
@@ -196,9 +264,12 @@ Assets
 │   │       │   │   └── 📄 TemperatureSystem.cs (4.71 KB)
 │   │       │   └── 📁 Thirst [1 files]
 │   │       │       └── 📄 ThirstSystem.cs (15.42 KB)
+│   │       ├── 📁 Test [1 files]
+│   │       │   └── 📄 GitHubToolTest.cs (1.69 KB)
 │   │       └── 📁 UI [5 files]
 │   │           ├── 📁 Core [1 files]
 │   │           │   └── 📄 NotificationSystem.cs (8.19 KB)
+│   │           ├── 📁 Fire
 │   │           ├── 📁 HUD
 │   │           ├── 📁 Journal [4 files]
 │   │           │   ├── 📁 Core [1 files]
@@ -238,14 +309,85 @@ Assets
 │   │   └── 📁 Structures
 │   │       ├── 📁 Crafting
 │   │       └── 📁 Shelters
-│   ├── 📁 Data [115 files]
+│   ├── 📁 Data [212 files]
 │   │   ├── 📁 Biomes
-│   │   ├── 📁 Databases [4 files]
-│   │   │   ├── 📦 Items.asset (411.00 B)
-│   │   │   ├── 📦 MasterItemDatabase.asset (399.00 B)
-│   │   │   ├── 📦 MasterRecipeDatabase.asset (405.00 B)
-│   │   │   └── 📦 Recipes.asset (417.00 B)
-│   │   ├── 📁 Items [103 files]
+│   │   ├── 📁 Config
+│   │   ├── 📁 Databases [2 files]
+│   │   ├── 📁 Items [179 files]
+│   │   │   ├── 📦 AI_apple.asset (902.00 B)
+│   │   │   ├── 📦 AI_arrow.asset (893.00 B)
+│   │   │   ├── 📦 AI_axe_stone.asset (713.00 B)
+│   │   │   ├── 📦 AI_backpack.asset (909.00 B)
+│   │   │   ├── 📦 AI_bandage.asset (899.00 B)
+│   │   │   ├── 📦 AI_bark.asset (910.00 B)
+│   │   │   ├── 📦 AI_berries.asset (915.00 B)
+│   │   │   ├── 📦 AI_bow.asset (901.00 B)
+│   │   │   ├── 📦 AI_bow_basic.asset (707.00 B)
+│   │   │   ├── 📦 AI_branch.asset (906.00 B)
+│   │   │   ├── 📦 AI_bread.asset (911.00 B)
+│   │   │   ├── 📦 AI_campfire.asset (925.00 B)
+│   │   │   ├── 📦 AI_charcoal.asset (941.00 B)
+│   │   │   ├── 📦 AI_clay.asset (900.00 B)
+│   │   │   ├── 📦 AI_cloth.asset (913.00 B)
+│   │   │   ├── 📦 AI_coal.asset (901.00 B)
+│   │   │   ├── 📦 AI_compass.asset (921.00 B)
+│   │   │   ├── 📦 AI_cooked_meat.asset (932.00 B)
+│   │   │   ├── 📦 AI_dry_grass.asset (918.00 B)
+│   │   │   ├── 📦 AI_fiber.asset (914.00 B)
+│   │   │   ├── 📦 AI_firewood.asset (929.00 B)
+│   │   │   ├── 📦 AI_fire_starter.asset (937.00 B)
+│   │   │   ├── 📦 AI_fish.asset (913.00 B)
+│   │   │   ├── 📦 AI_fishing_rod.asset (912.00 B)
+│   │   │   ├── 📦 AI_flour.asset (897.00 B)
+│   │   │   ├── 📦 AI_glass.asset (910.00 B)
+│   │   │   ├── 📦 AI_gold_ingot.asset (926.00 B)
+│   │   │   ├── 📦 AI_gold_ore.asset (918.00 B)
+│   │   │   ├── 📦 AI_hammer.asset (909.00 B)
+│   │   │   ├── 📦 AI_hardwood_log.asset (927.00 B)
+│   │   │   ├── 📦 AI_iron_axe.asset (912.00 B)
+│   │   │   ├── 📦 AI_iron_ingot.asset (919.00 B)
+│   │   │   ├── 📦 AI_iron_ore.asset (926.00 B)
+│   │   │   ├── 📦 AI_iron_pickaxe.asset (928.00 B)
+│   │   │   ├── 📦 AI_iron_sword.asset (910.00 B)
+│   │   │   ├── 📦 AI_kindling.asset (922.00 B)
+│   │   │   ├── 📦 AI_knife.asset (905.00 B)
+│   │   │   ├── 📦 AI_knife_basic.asset (720.00 B)
+│   │   │   ├── 📦 AI_leather.asset (921.00 B)
+│   │   │   ├── 📦 AI_leather_armor.asset (926.00 B)
+│   │   │   ├── 📦 AI_leather_boots.asset (929.00 B)
+│   │   │   ├── 📦 AI_map.asset (888.00 B)
+│   │   │   ├── 📦 AI_matches.asset (924.00 B)
+│   │   │   ├── 📦 AI_meat_cooked.asset (717.00 B)
+│   │   │   ├── 📦 AI_meat_raw.asset (708.00 B)
+│   │   │   ├── 📦 AI_medicine.asset (913.00 B)
+│   │   │   ├── 📦 AI_mushroom.asset (924.00 B)
+│   │   │   ├── 📦 AI_nail.asset (909.00 B)
+│   │   │   ├── 📦 AI_oil.asset (906.00 B)
+│   │   │   ├── 📦 AI_peat.asset (909.00 B)
+│   │   │   ├── 📦 AI_pickaxe_stone.asset (723.00 B)
+│   │   │   ├── 📦 AI_raw_meat.asset (930.00 B)
+│   │   │   ├── 📦 AI_resin.asset (921.00 B)
+│   │   │   ├── 📦 AI_rope.asset (900.00 B)
+│   │   │   ├── 📦 AI_salt.asset (896.00 B)
+│   │   │   ├── 📦 AI_seed_wheat.asset (910.00 B)
+│   │   │   ├── 📦 AI_shovel.asset (906.00 B)
+│   │   │   ├── 📦 AI_spear_wood.asset (714.00 B)
+│   │   │   ├── 📦 AI_stick.asset (723.00 B)
+│   │   │   ├── 📦 AI_sticks.asset (918.00 B)
+│   │   │   ├── 📦 AI_stone.asset (925.00 B)
+│   │   │   ├── 📦 AI_stone_axe.asset (911.00 B)
+│   │   │   ├── 📦 AI_stone_pickaxe.asset (933.00 B)
+│   │   │   ├── 📦 AI_tent.asset (898.00 B)
+│   │   │   ├── 📦 AI_tinder.asset (928.00 B)
+│   │   │   ├── 📦 AI_torch.asset (901.00 B)
+│   │   │   ├── 📦 AI_twigs.asset (902.00 B)
+│   │   │   ├── 📦 AI_water_bottle.asset (926.00 B)
+│   │   │   ├── 📦 AI_wheat.asset (906.00 B)
+│   │   │   ├── 📦 AI_wooden_spear.asset (929.00 B)
+│   │   │   ├── 📦 AI_wood_log.asset (934.00 B)
+│   │   │   ├── 📦 AI_wood_plank.asset (926.00 B)
+│   │   │   ├── 📦 apple.asset (868.00 B)
+│   │   │   ├── 📦 axe.asset (861.00 B)
 │   │   │   ├── 📦 Generated_0.asset (643.00 B)
 │   │   │   ├── 📦 Generated_1.asset (641.00 B)
 │   │   │   ├── 📦 Generated_10.asset (645.00 B)
@@ -347,17 +489,43 @@ Assets
 │   │   │   ├── 📦 Generated_98.asset (645.00 B)
 │   │   │   ├── 📦 Generated_99.asset (645.00 B)
 │   │   │   ├── 📦 ingot_tin.asset (797.00 B)
-│   │   │   ├── 📦 item_wood.asset (769.00 B)
-│   │   │   └── 📦 misc_salt.asset (806.00 B)
-│   │   ├── 📁 Recipes [8 files]
-│   │   │   ├── 📦 recipe_berry_juice.asset (1.56 KB)
-│   │   │   ├── 📦 recipe_campfire.asset (1.55 KB)
-│   │   │   ├── 📦 recipe_cooked_meat.asset (1.38 KB)
-│   │   │   ├── 📦 recipe_crafting_bench.asset (1.58 KB)
-│   │   │   ├── 📦 recipe_planks.asset (1.37 KB)
-│   │   │   ├── 📦 recipe_rope.asset (1.35 KB)
-│   │   │   ├── 📦 recipe_stone_axe.asset (1.72 KB)
-│   │   │   └── 📦 recipe_stone_pickaxe.asset (1.74 KB)
+│   │   │   ├── 📦 iron_ore.asset (876.00 B)
+│   │   │   ├── 📦 misc_salt.asset (806.00 B)
+│   │   │   ├── 📦 stone.asset (868.00 B)
+│   │   │   └── 📦 wood_log.asset (877.00 B)
+│   │   ├── 📁 Particles
+│   │   ├── 📁 Recipes [31 files]
+│   │   │   ├── 📦 AI_recipe_arrow.asset (724.00 B)
+│   │   │   ├── 📦 AI_recipe_backpack.asset (735.00 B)
+│   │   │   ├── 📦 AI_recipe_bandage.asset (727.00 B)
+│   │   │   ├── 📦 AI_recipe_basic_campfire.asset (760.00 B)
+│   │   │   ├── 📦 AI_recipe_bow.asset (721.00 B)
+│   │   │   ├── 📦 AI_recipe_bread.asset (719.00 B)
+│   │   │   ├── 📦 AI_recipe_campfire.asset (732.00 B)
+│   │   │   ├── 📦 AI_recipe_charcoal.asset (751.00 B)
+│   │   │   ├── 📦 AI_recipe_cooked_meat.asset (751.00 B)
+│   │   │   ├── 📦 AI_recipe_cooking_fire.asset (747.00 B)
+│   │   │   ├── 📦 AI_recipe_fire_starter.asset (755.00 B)
+│   │   │   ├── 📦 AI_recipe_forge.asset (733.00 B)
+│   │   │   ├── 📦 AI_recipe_iron_axe.asset (727.00 B)
+│   │   │   ├── 📦 AI_recipe_iron_ingot.asset (743.00 B)
+│   │   │   ├── 📦 AI_recipe_iron_pickaxe.asset (737.00 B)
+│   │   │   ├── 📦 AI_recipe_iron_sword.asset (735.00 B)
+│   │   │   ├── 📦 AI_recipe_kindling_bundle.asset (757.00 B)
+│   │   │   ├── 📦 AI_recipe_leather_armor.asset (745.00 B)
+│   │   │   ├── 📦 AI_recipe_medicine.asset (738.00 B)
+│   │   │   ├── 📦 AI_recipe_rope.asset (721.00 B)
+│   │   │   ├── 📦 AI_recipe_signal_fire.asset (749.00 B)
+│   │   │   ├── 📦 AI_recipe_split_firewood.asset (752.00 B)
+│   │   │   ├── 📦 AI_recipe_stone_axe.asset (736.00 B)
+│   │   │   ├── 📦 AI_recipe_stone_pickaxe.asset (737.00 B)
+│   │   │   ├── 📦 AI_recipe_tent.asset (713.00 B)
+│   │   │   ├── 📦 AI_recipe_tinder_bundle.asset (757.00 B)
+│   │   │   ├── 📦 AI_recipe_torch.asset (717.00 B)
+│   │   │   ├── 📦 AI_recipe_torch_bundle.asset (745.00 B)
+│   │   │   ├── 📦 AI_recipe_wooden_spear.asset (740.00 B)
+│   │   │   ├── 📦 AI_recipe_wood_plank.asset (748.00 B)
+│   │   │   └── 📦 recipe_wooden_axe.asset (1.12 KB)
 │   │   ├── 📁 StatusEffects
 │   │   ├── 📁 Weather
 │   │   └── 📁 Wildlife
@@ -369,6 +537,7 @@ Assets
 │   │   │   └── 🎯 [PLAYER].prefab (907.00 B)
 │   │   ├── 📁 Effects
 │   │   ├── 📁 Environment
+│   │   ├── 📁 Fire
 │   │   ├── 📁 Items
 │   │   ├── 📁 Structures
 │   │   ├── 📁 UI
@@ -384,7 +553,7 @@ Assets
 │   │   │   └── 🎬 _Persistent.unity (11.63 KB)
 │   │   ├── 📁 Development [2 files]
 │   │   │   ├── 🎬 Phase1_PlayerTest.unity (27.54 KB)
-│   │   │   └── 🎬 Phase2_InventoryTest.unity (30.21 KB)
+│   │   │   └── 🎬 Phase2_InventoryTest.unity (49.25 KB)
 │   │   └── 📁 World [2 files]
 │   │       ├── 🎬 MainGame.unity (15.61 KB)
 │   │       └── 🎬 World_Prototype.unity (11.64 KB)
@@ -403,5 +572,5 @@ Assets
 └── 📄 PlayerControls.cs (26.55 KB)
 
 ==================================================
-Total: 196 folders, 202 files
-Size: 1.64 MB
+Total: 219 folders, 348 files
+Size: 4.09 MB

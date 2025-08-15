@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4e5b6f3b83bdc7429765a544da4525a, type: 3}
+  m_Name: AI_kindling
+  m_EditorClassIdentifier: 
+  itemID: kindling
+  displayName: Kindling
+  description: Small twigs and branches to grow a fire.
+  icon: {fileID: 0}
+  worldModel: {fileID: 0}
+  primaryCategory: 8
+  subcategory: 0
+  tags: 
+  weight: 0.2
+  maxStackSize: 30
+  gridSize: {x: 2, y: 1}
+  hasDurability: 0
+  maxDurability: 100
+  baseValue: 3
+  currencyType: 0
+  requiredLevel: 0
+  skillRequirements: []
+  useEffects: []
+  equipEffects: []
+  isCraftable: 1
+  isDeconstructable: 1
+  deconstructOutputs: []
+  itemType: 256
+  allowRotation: 1
+  useCustomShape: 0

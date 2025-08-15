@@ -640,7 +640,7 @@ public class UltimateBatchProcessor : EditorWindow
             recipe.recipeID = data.recipeID;
             recipe.recipeName = data.recipeName;
             recipe.description = data.description;
-            recipe.category = ParseCraftingCategory(data.category);
+            recipe.category = data.category;
             recipe.baseCraftTime = data.craftTime;
             recipe.tier = data.tier;
             recipe.isKnownByDefault = data.unlockedByDefault;

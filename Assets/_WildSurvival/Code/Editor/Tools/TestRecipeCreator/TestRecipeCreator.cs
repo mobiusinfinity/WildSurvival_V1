@@ -107,7 +107,7 @@ public class TestRecipeCreator : EditorWindow
                 new IngredientData("item_rope", 1)
             },
             new OutputData("item_stone_axe", 1, 1),
-            CraftingRecipe.WorkbenchType.CraftingBench,
+            CraftingRecipe.WorkbenchType.WorkBench,
             10f
         );
 
@@ -124,7 +124,7 @@ public class TestRecipeCreator : EditorWindow
                 new IngredientData("item_rope", 1)
             },
             new OutputData("item_stone_pickaxe", 1, 1),
-            CraftingRecipe.WorkbenchType.CraftingBench,
+            CraftingRecipe.WorkbenchType.WorkBench,
             12f
         );
 

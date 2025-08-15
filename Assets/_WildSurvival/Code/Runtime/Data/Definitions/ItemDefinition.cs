@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+
 /// <summary>
 /// Core item definition for Wild Survival inventory system
 /// Part of the Ultimate Inventory Tool
@@ -49,12 +50,66 @@ public class ItemDefinition : ScriptableObject
     public bool isDeconstructable = true;
     public ItemOutput[] deconstructOutputs = new ItemOutput[0];
 
+    [Header("Fire & Fuel Properties")]
+    [SerializeField] private ItemFuelProperties fuelProperties; // RENAMED to avoid conflict
+
+    public ItemFuelProperties FuelProperties => fuelProperties;
+    public bool IsFuel => fuelProperties != null && fuelProperties.isFuel;
+
+    [System.Serializable]
+    public class ItemFuelProperties // RENAMED CLASS
+    {
+        public bool isFuel = false;
+        public FireInstance.FuelType fuelType = FireInstance.FuelType.Kindling;
+        public float burnDuration = 10f; // minutes
+        public float burnTemperature = 400f;
+        public float heatOutput = 1f;
+        public float ignitionTemperature = 200f;
+        public bool spreadsFire = false;
+        public float smokeAmount = 1f;
+        public float fuelValue = 10f; // units per item
+
+        public float GetEffectiveBurnDuration(bool isWet)
+        {
+            return isWet ? burnDuration * 0.3f : burnDuration;
+        }
+    }
+
+    //[SerializeField] private FuelProperties fuelProperties = new FuelProperties();
+
+    //public FuelProperties FuelProperties => fuelProperties;
+    //public bool IsFuel => fuelProperties != null && fuelProperties.isFuel;
+
+    //[System.Serializable]
+    //public class FuelProperties
+    //{
+    //    public bool isFuel = false;
+    //    public FireInstance.FuelType fuelType = FireInstance.FuelType.Kindling;
+    //    public float burnDuration = 10f; // minutes
+    //    public float burnTemperature = 400f;
+    //    public float heatOutput = 1f;
+    //    public float ignitionTemperature = 200f;
+    //    public bool spreadsFire = false;
+    //    public float smokeAmount = 1f;
+    //    public float fuelValue = 10f; // units per item
+
+    //    public float GetEffectiveBurnDuration(bool isWet)
+    //    {
+    //        return isWet ? burnDuration * 0.3f : burnDuration;
+    //    }
+    //}
+
     public ItemType itemType = ItemType.Misc;      // For type compatibility
     public bool stackable => maxStackSize > 1;      // Computed from maxStackSize
     public int gridWidth => gridSize.x;             // Computed from gridSize
     public int gridHeight => gridSize.y;            // Computed from gridSize
 
-    // Validation
+    public bool allowRotation = true;
+    public bool useCustomShape = false;
+
+
+
+    // Update OnValidate method:
     private void OnValidate()
     {
         if (string.IsNullOrEmpty(itemID))
@@ -62,16 +117,21 @@ public class ItemDefinition : ScriptableObject
             itemID = "item_" + name.Replace(" ", "_").ToLower();
         }
 
+        // Auto-set rotation based on grid size
+        allowRotation = (gridSize.x != gridSize.y);
+
         // Initialize shape grid if needed
-        if (shapeGrid == null || shapeGrid.Length != gridSize.x * gridSize.y)
+        if (gridSize.x > 0 && gridSize.y > 0)
         {
-            shapeGrid = new bool[gridSize.x, gridSize.y];
-            // Default to full shape
-            for (int x = 0; x < gridSize.x; x++)
+            if (shapeGrid == null || shapeGrid.GetLength(0) != gridSize.x || shapeGrid.GetLength(1) != gridSize.y)
             {
-                for (int y = 0; y < gridSize.y; y++)
+                shapeGrid = new bool[gridSize.x, gridSize.y];
+                for (int x = 0; x < gridSize.x; x++)
                 {
-                    shapeGrid[x, y] = true;
+                    for (int y = 0; y < gridSize.y; y++)
+                    {
+                        shapeGrid[x, y] = true;
+                    }
                 }
             }
         }

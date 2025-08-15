@@ -16,7 +16,8 @@ public class RecipeDefinition : ScriptableObject
     public Sprite icon;
 
     [Header("Category")]
-    public CraftingCategory category = CraftingCategory.Tools;
+    //public CraftingCategory category = CraftingCategory.Tools;
+    public string category = "Tools";
     public int tier = 0;
 
     [Header("Requirements")]
@@ -83,7 +84,7 @@ public enum WorkstationType
     None,
     Campfire,
     CookingPot,
-    Workbench,
+    WorkBench,
     Forge,
     Anvil,
     TanningRack,

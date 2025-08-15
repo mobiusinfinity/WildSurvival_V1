@@ -14,7 +14,7 @@ public class WorkbenchSystem : MonoBehaviour, IInteractable
     [Header("Workbench Configuration")]
     [SerializeField] private string workbenchID = "basic_workbench";
     [SerializeField] private string displayName = "Crafting Bench";
-    [SerializeField] private CraftingRecipe.WorkbenchType workbenchType = CraftingRecipe.WorkbenchType.CraftingBench;
+    [SerializeField] private CraftingRecipe.WorkbenchType workbenchType = CraftingRecipe.WorkbenchType.WorkBench;
     [SerializeField] private int tier = 1;
 
     [Header("Crafting Bonuses")]

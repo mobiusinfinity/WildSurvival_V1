@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -14,15 +14,66 @@ public class RecipeDatabase : ScriptableObject
 {
     [SerializeField] private List<RecipeDefinition> recipes = new List<RecipeDefinition>();
 
-    public void AddRecipe(RecipeDefinition recipe)
+    public bool AddRecipe(RecipeDefinition recipe)
     {
-        if (recipe != null && !recipes.Contains(recipe))
+        if (recipe == null)
         {
-            recipes.Add(recipe);
-#if UNITY_EDITOR
-            EditorUtility.SetDirty(this);
-#endif
+            Debug.LogError("Cannot add null recipe to database!");
+            return false;
         }
+
+        // Check for duplicate ID
+        if (recipes.Any(r => r != null && r.recipeID == recipe.recipeID))
+        {
+            Debug.LogError($"Recipe with ID '{recipe.recipeID}' already exists in database!");
+            return false;
+        }
+
+        // Check for duplicate asset
+        if (recipes.Contains(recipe))
+        {
+            Debug.LogWarning($"Recipe '{recipe.recipeID}' is already in the database!");
+            return false;
+        }
+
+        recipes.Add(recipe);
+#if UNITY_EDITOR
+        EditorUtility.SetDirty(this);
+#endif
+        Debug.Log($"✅ Added recipe '{recipe.recipeName}' (ID: {recipe.recipeID}) to database");
+        return true;
+    }
+
+    public bool HasRecipeWithID(string recipeID)
+    {
+        return recipes.Any(r => r != null && r.recipeID == recipeID);
+    }
+
+    // Clean up method
+    public void CleanDatabase()
+    {
+        recipes.RemoveAll(r => r == null);
+
+        var seen = new HashSet<string>();
+        var uniqueRecipes = new List<RecipeDefinition>();
+
+        foreach (var recipe in recipes)
+        {
+            if (!seen.Contains(recipe.recipeID))
+            {
+                seen.Add(recipe.recipeID);
+                uniqueRecipes.Add(recipe);
+            }
+            else
+            {
+                Debug.LogWarning($"Removed duplicate recipe: {recipe.recipeID}");
+            }
+        }
+
+        recipes = uniqueRecipes;
+#if UNITY_EDITOR
+        EditorUtility.SetDirty(this);
+#endif
     }
 
     public void RemoveRecipe(RecipeDefinition recipe)
@@ -51,9 +102,16 @@ public class RecipeDatabase : ScriptableObject
         return recipes.FirstOrDefault(r => r.recipeName == recipeName);
     }
 
+    //public List<RecipeDefinition> GetRecipesByCategory(CraftingCategory category)
+    //{
+    //    return recipes.Where(r => r.category == category).ToList();
+    //}
+
     public List<RecipeDefinition> GetRecipesByCategory(CraftingCategory category)
     {
-        return recipes.Where(r => r.category == category).ToList();
+        // Convert enum to string for comparison
+        string categoryString = category.ToString();
+        return recipes.Where(r => r.category == categoryString).ToList();
     }
 
     public List<RecipeDefinition> GetRecipesByWorkstation(WorkstationType workstation)
@@ -76,6 +134,15 @@ public class RecipeDatabase : ScriptableObject
     }
 
     public void Clear()
+    {
+        recipes.Clear();
+#if UNITY_EDITOR
+        EditorUtility.SetDirty(this);
+#endif
+    }
+
+    // In RecipeDatabase.cs, add this method:
+    public void ClearAllRecipes()
     {
         recipes.Clear();
 #if UNITY_EDITOR
@@ -127,3 +194,4 @@ public class RecipeDatabase : ScriptableObject
     }
 #endif
 }
+
